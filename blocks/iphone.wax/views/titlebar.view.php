@@ -1,0 +1,1 @@
+<div class='wax_iphone_titlebar'><?=$title?></div>
