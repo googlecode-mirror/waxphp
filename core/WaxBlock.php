@@ -13,10 +13,12 @@
 			'roles' => array()
 		);
 		var $name = NULL;
+		private $_blockdir = '';
 		
 		function __construct($blockpath, $include_files = false) {
 			$info = pathinfo($blockpath);
-			$this->name = $info['dirname'] . "/" . $info['basename'];
+			$this->_blockdir = $info['dirname'] . "/" . $info['basename'];
+			$this->name = BlockManager::GetBlocknameFromPath($this->_blockdir);
 			$this->loadResources($blockpath, $include_files);
 		}
 				
@@ -25,7 +27,7 @@
 			foreach ($allowed as $file) {	
 				if (is_dir("$dir/$file")) {
 					if ($file == "lib") {
-						require_dir("$dir/$file");
+						require_dir("$dir/lib");
 						continue;
 					}
 					foreach (scandir("$dir/$file") as $thisfile) {
@@ -37,9 +39,7 @@
 							if ($file == "views")
 								$this->_resources[$file][array_shift(explode(".",$thisfile))] = "$dir/$file/$thisfile";
 							else {
-								$path = Wax::LookupPath("web/block/$file",array("block" => $this->name, $file => array_shift(explode(".",$thisfile))));
-								if (!file_exists($path))
-									$path = PathManager::FStoWEB("$dir/$file/$thisfile");
+								$path = str_replace($_SERVER['DOCUMENT_ROOT'],'',($this->_blockdir . "/$file/$thisfile"));
 								$this->_resources[$file][array_shift(explode(".",$thisfile))] = $path;
 							}
 						}

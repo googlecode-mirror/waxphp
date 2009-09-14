@@ -5,8 +5,8 @@
         
         public static $version = array(
         	"version"	=> 0,
-        	"revision"  => 7,
-        	"build" 	=> 1
+        	"revision"  => 8,
+        	"build" 	=> 0
         );
         
         // Naming for the paths:
@@ -20,10 +20,11 @@
 		// any resources even if you tell it exactly where they are.
         public static $paths = array(
         	// important base paths needed to determine working directories, etc..
-            'web'			=> '[relpath]',
-            'DOCUMENT_ROOT' => '<DOCUMENT_ROOT>',
-            'fs' 			=> '<DOCUMENT_ROOT>[relpath]',
-            'app'			=> '',
+            'fs' 			=> '<DOCUMENT_ROOT>',
+			'web'			=> '',
+
+			'wax'			=> '', // set @ runtime
+            'app'			=> '', // set @ runtime
             'core' 			=> 'core',                                          // Folder that holds the core Wax functionality
                         
             // specify folder names for different types of data
@@ -58,7 +59,7 @@
         public static $blockpath = array(
         	"fs/app/appblock",		// /app/Block.wax
     		"fs/app/block",		// /app/blocks/Block.wax
-    		"fs/block",			// /wax/blocks/Block.wax
+    		"fs/wax/block",			// /wax/blocks/Block.wax
         );
         
         // blocks to autoload (plugins/libraries/themes)

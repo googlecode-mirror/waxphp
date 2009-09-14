@@ -39,14 +39,11 @@
         // initialize Wax
         static function Init($dir) {
             if (!self::$_init) {
-                WaxConf::$paths['fs'] = dirname(__FILE__);
-                WaxConf::$paths['web'] = str_replace($_SERVER['DOCUMENT_ROOT'],'',dirname(__FILE__));
+                WaxConf::$paths['wax'] = str_replace($_SERVER['DOCUMENT_ROOT'],'',dirname(__FILE__));
+				WaxConf::$paths['app'] = str_replace($_SERVER['DOCUMENT_ROOT'],'',$dir);
+				
             	// pre-parse the paths array for fast path lookups
                 PathManager::PreParse();
-                
-                // determine application path
-                $dir = str_replace('\\','/',$dir);
-                WaxConf::$paths['app'] = str_replace(self::LookupPath('fs/'),'',$dir);
                 
                 // require Wax core
                 $dir = self::LookupPath('fs/core');

@@ -4,11 +4,16 @@
         static function LoadBlock($block) {
         	if (!isset(Wax::$loaded_blocks[$block])) {
 	        	$path = self::findBlock($block);
+	        	if (!empty($path)) {
+	        		$blockobj = new WaxBlock($path, true);
+		        	Wax::$loaded_blocks[$block] = $blockobj;
 	        	
-	        	$blockobj = new WaxBlock($path, true);
-	        	Wax::$loaded_blocks[$block] = $blockobj;
-	        	
-	        	return $blockobj;
+		        	return $blockobj;
+				}
+				else {
+					throw new Exception("Couldn't load block: $block");
+					return NULL;
+				}
 	        }
 	        else return self::GetBlock($block);
         }
@@ -23,7 +28,7 @@
         		return Wax::$loaded_blocks[$block];
         	else {
 	        	$path = self::findBlock($block);
-	        	if (is_null($path)) return NULL;
+	        	if (is_null($path) || empty($path)) return NULL;
 	        	else return new WaxBlock($path);
 	        }
         }
@@ -80,7 +85,7 @@
         private static function findBlock($block) {
         	foreach (WaxConf::$blockpath as $path) {
         		$blockloc = PathManager::LookupPath($path,array("block" => $block));
-	        	if (is_dir($blockloc)) {
+				if (is_dir($blockloc)) {
 	        		return $blockloc;
 	        	}
 	        }

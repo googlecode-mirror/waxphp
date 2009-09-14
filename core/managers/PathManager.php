@@ -12,7 +12,7 @@
 				$replaced = self::ResolveArgs($replaced,$args);
 			}
 
-			return $replaced;
+			return preg_replace("/([\/]+)/","/",$replaced);
         }
         
         // make sure the paths are only getting parsed once per page load
