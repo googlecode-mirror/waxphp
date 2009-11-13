@@ -1,8 +1,8 @@
 <?php
 	/**
-	*  Base class for WaxBlocks -- can be used to build plugins/tags/etc.
-	*  This class defines the public class for a WaxBlock, so any public functions
-	*  should have a definition in a class that extends WaxBlock
+	*  Base class for WaxBlocks -- can be used to build plugins/libraries/etc.
+	*  This class performs all the required actions necessary to load and access
+	*  information from a block
 	*/
 	class WaxBlock {
 		private $_resources = array(
@@ -31,13 +31,22 @@
 						continue;
 					}
 					foreach (scandir("$dir/$file") as $thisfile) {
-						if ($thisfile[0] == '.') continue;
+						if ($thisfile[0] == '.' || $thisfile[0] == '_') continue;
 						else {
 							if ($file == "roles" && $include_files) {
 								require_once("$dir/$file/$thisfile");
 							}
-							if ($file == "views")
-								$this->_resources[$file][array_shift(explode(".",$thisfile))] = "$dir/$file/$thisfile";
+							
+							if ($file == "views") {
+								$viewsdir = "$dir/$file/$thisfile";
+								if (is_dir($viewsdir)) {
+									foreach (scandir($viewsdir) as $viewfile) {
+										if ($viewfile[0] == '.' || $viewfile[0] == '_') continue;
+										$this->_resources[$file]["$thisfile/" . array_shift(explode(".",$viewfile))] = "$viewsdir/$viewfile";
+									}
+								}
+								else $this->_resources[$file][array_shift(explode(".",$thisfile))] = $viewsdir;
+							}
 							else {
 								$path = str_replace($_SERVER['DOCUMENT_ROOT'],'',($this->_blockdir . "/$file/$thisfile"));
 								$this->_resources[$file][array_shift(explode(".",$thisfile))] = $path;

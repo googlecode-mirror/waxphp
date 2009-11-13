@@ -4,30 +4,30 @@
 	* interact with the database.
 	*/
 	// define the DBUser role that contains utility functions for escaping and reflecting
-	interface DBUser extends Role {}
+	interface rDBUser extends Role {}
 	
 	// define the subroles of DBUser
-	interface DBCreator extends DBUser {}
-	interface DBReader extends DBUser {}
-	interface DBUpdater extends DBUser {}
-	interface DBDeleter extends DBUser {}
+	interface rDBCreator extends rDBUser {}
+	interface rDBReader extends rDBUser {}
+	interface rDBUpdater extends rDBUser {}
+	interface rDBDeleter extends rDBUser {}
 	
 	// and finally define a SuperRole that can perform all the basic roles of a DBUser
 	// PHP automatically figures out interface inheritance, so this will reflect how we expect
-	interface DBCRUD extends DBUser, DBCreator, DBReader, DBUpdater, DBDeleter {}
+	interface rDBCRUD extends rDBUser, rDBCreator, rDBReader, rDBUpdater, rDBDeleter {}
 	
 	
-	class DBUserActions {
-		static function Escape(DBUser $self, $str) {
+	class rDBUserActions {
+		static function Escape(rDBUser $self, $str) {
 			if (is_numeric($str)) return $str;
 			else return "'" . mysql_real_escape_string($str) . "'";
 		}
-		static function ParseTable(DBUser $self) {
+		static function ParseTable(rDBUser $self) {
 			$table = get_class($self);
 			$table = str_replace(array("model","Model"), "", $table);
 			return strtolower($self->table_prefix . $table);
 		}
-		static function Reflect(DBUser $self) {
+		static function Reflect(rDBUser $self) {
 			$query = "SHOW COLUMNS FROM " . $self->ParseTable() . ";";
 			$result = mysql_query($query) or die("ERROR: " . mysql_error());
 			
@@ -49,7 +49,7 @@
 			
 			return $fields;
 		}
-		static function Query(DBUser $self, $query) {
+		static function Query(rDBUser $self, $query) {
 			$res = mysql_query($query) or die("ERROR: " . mysql_error());
 			$ret = array();
 			
@@ -59,14 +59,14 @@
 			
 			return $ret;
 		}
-		static function Execute(DBUser $self, $query) {
+		static function Execute(rDBUser $self, $query) {
 			mysql_query($query) or die("ERROR: " . mysql_error());
 		}
 	}
 	
 	// give the roles some actions -- just basic mysql actions for now
 	class DBCreatorActions {
-		static function Create(DBCreator $self, array $arguments) {
+		static function Create(rDBCreator $self, array $arguments) {
 			// grab the table name from $self->model
 			$table = $self->ParseTable();
 			$query = "INSERT INTO $table (";
@@ -88,7 +88,7 @@
 		}
 	}
 	class DBReaderActions {
-		static function Read(DBReader $self, $arguments = NULL) {
+		static function Read(rDBReader $self, $arguments = NULL) {
 			$table = $self->ParseTable();
 			
 			$query = "SELECT * FROM $table";
@@ -155,7 +155,7 @@
 		}
 	}
 	class DBUpdaterActions {
-		static function Update(DBUpdater $self, array $arguments, $id = NULL) {
+		static function Update(rDBUpdater $self, array $arguments, $id = NULL) {
 			$table = $self->ParseTable();
 			$query = "UPDATE $table SET ";
 			
@@ -182,7 +182,7 @@
 		}
 	}
 	class DBDeleterActions {
-		static function Delete(DBDeleter $self, $id) {
+		static function Delete(rDBDeleter $self, $id) {
 			$table = $self->ParseTable();
 			$query = "DELETE FROM $table WHERE id=$id;";
 			mysql_query($query) or die("ERROR: " . mysql_error());

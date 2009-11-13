@@ -12,23 +12,30 @@
     *
     * @author Joe Chrzanowski
     */
-	class ArraySurrogate implements ArrayAccess {
-		private $_parent = NULL;
-		function __construct($parent) { 
-			$this->_parent =& $parent; 
+	class ArraySurrogate extends DCIObject implements ArrayAccess {
+		protected $_arrayref = NULL;
+		function __construct($parent = null, $reference = true) { 
+			parent::__construct();
+			
+			if (!is_null($parent) && $reference)
+				$this->_arrayref =& $parent; 
+			else if (!is_null($parent))
+				$this->_arrayref = $parent;
+			else
+				$this->_arrayref = array();
 		}
 		
 		// basic get and set methods
 		function Get($index) {
-			return $this->_parent[$index];
+			return $this->_arrayref[$index];
 		}
 		function Set($index,$val) {
-			$this->_parent[$index] = $val;
+			$this->_arrayref[$index] = $val;
 		}
 		
 		// arrayAccess implementation
 		function offsetExists($offset) {
-			return isset($this->_parent[$offset]);
+			return isset($this->_arrayref[$offset]);
 		}
 		function offsetGet($offset) {
 			return $this->Get($offset);
@@ -37,12 +44,15 @@
 			$this->Set($offset,$value);
 		}
 		function offsetUnset($offset) {
-			unset($this->_parent[$offset]);
+			unset($this->_arrayref[$offset]);
 		}
 		
+		function ToArray() {
+			return $this->_arrayref;
+		}
 		
 		function __toString() {
-			return "<pre>" . print_r($this->_parent,true) . "</pre>";
+			return "<pre>\n" . print_r($this->_arrayref,true) . "</pre>\n";
 		}
 	}
 ?>

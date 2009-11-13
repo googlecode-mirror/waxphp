@@ -1,5 +1,7 @@
 <?php
 	class BlockManager {
+		private static $_blockresources = array();
+		
 		// block functions
         static function LoadBlock($block) {
         	if (!isset(Wax::$loaded_blocks[$block])) {
@@ -22,7 +24,7 @@
         // to try and find the block
         static function GetBlock($block = NULL) {
         	if (is_null($block))
-        		echo "Trying to get block in $block<br />";
+        		echo "Trying to get block in $block<br />\n";
         	
         	if (isset(Wax::$loaded_blocks[$block]))
         		return Wax::$loaded_blocks[$block];
@@ -39,10 +41,29 @@
         	return Wax::$loaded_blocks;
         }
         // find out which block a file is located in -- doesn't always work
-        static function GetBlockContext($file) {
-        	$path = pathinfo($file);
-        	$path = pathinfo($path['dirname']);
-        	return $path['filename'];
+        static function GetBlockFromContext($filename = NULL) {
+        	if (is_null($filename)) {
+				$filename = array_pop(debug_backtrace());
+				$classname = $filename['class'];
+				
+				$rfc = ReflectionClass::export($classname,true);
+				$classfiles = array();
+				preg_match_all("/@@(.*\.php)/",$rfc,$classfiles);
+				$filename = trim(array_shift($classfiles[1]));
+			}
+			
+			// parse out the block...
+			$info = pathinfo($filename);
+			$pathparts = explode("/",$info['dirname']);
+			foreach ($pathparts as $part) {
+				if (strpos($part,".wax") !== false) {
+					$block = Wax::GetBlock(array_shift(explode(".",$part)));
+					if (!is_null($block))
+						return $block;
+				}
+			}
+			
+			return NULL;
         }
 		static function GetBlocknameFromPath($path) {
 			$matches = array();
@@ -86,7 +107,7 @@
         	foreach (WaxConf::$blockpath as $path) {
         		$blockloc = PathManager::LookupPath($path,array("block" => $block));
 				if (is_dir($blockloc)) {
-	        		return $blockloc;
+					return $blockloc;
 	        	}
 	        }
         	return NULL;

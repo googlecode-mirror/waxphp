@@ -44,7 +44,7 @@
                 	if (isset(WaxConf::$paths[$match]))
 	                    $path = str_replace("[$match]",WaxConf::$paths[$match],$path);
 	                else {
-	                	echo "Error - Invalid variable: $match<br />";
+	                	echo "Error - Invalid variable: $match<br />\n";
 	                	$path = str_replace("[$match]",'',$path);
 	                }
                 }

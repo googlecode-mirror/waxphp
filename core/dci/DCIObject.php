@@ -19,7 +19,7 @@
 		
 		function __construct() {
 			$this->roles = $this->reflectRoles();
-			// the default Model constructor looks through the roles to more quickly identify possible classnames
+			// the default constructor looks through the roles to more quickly identify possible classnames
 			// it also makes sure that all defined roles actually exist
 			foreach ($this->roles as $role) {
 				$this->AddRole($role);
@@ -38,19 +38,23 @@
 				return NULL; // instead of throwing an exception, treat it like a message and just return NULL
 			}
 		}
-		
-		// Manage a property
 		function __get($var) {
 			if (isset($this->properties[$var]))
 				return $this->properties[$var];
 		}
 		function __set($var,$value) {
-			if (array_key_exists($var,$this->properties)) {
+			if ($value instanceof ArraySurrogate) {
+				$this->$var = $value;
+			}
+			else if (array_key_exists($var,$this->properties)) {
 				$this->properties[$var] = $value;
 			}
 			else
 				error_log("access to unknown property $var in " . get_class($this));
 		}
+		
+		
+		
 		
 		function IsClassOrRole($cr) {
 			if (isset($this->roleclasses[$cr]) || get_class($this) == $cr) 
@@ -83,10 +87,16 @@
 					}
 				}
 				
-				// and add properties to the DCI object
+				// and add role properties to the DCI object
 				$vars = get_class_vars($roleclass);
-				foreach ($vars as $var => $value) {
-					$this->properties[$var] = $value;
+				foreach ($vars as $var => $value) {	
+					if (isset($this->properties[$var]))
+						error_log("ERROR: Property conflict: $var in " . get_class($this));
+					else if (is_array($value)) {
+						$this->$var = new ArraySurrogate($value,false);
+					}
+					else
+						$this->properties[$var] = $value;
 				}
 				
 				if (isset($this->roleclasses[$roleclass]['init'])) {

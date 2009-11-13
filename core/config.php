@@ -5,7 +5,7 @@
         
         public static $version = array(
         	"version"	=> 0,
-        	"revision"  => 8,
+        	"revision"  => 9,
         	"build" 	=> 0
         );
         
@@ -22,6 +22,7 @@
         	// important base paths needed to determine working directories, etc..
             'fs' 			=> '<DOCUMENT_ROOT>',
 			'web'			=> '',
+			'ver'			=> '1.0',
 
 			'wax'			=> '', // set @ runtime
             'app'			=> '', // set @ runtime
@@ -57,15 +58,24 @@
         
         // paths to look for blocks
         public static $blockpath = array(
-        	"fs/app/appblock",		// /app/Block.wax
-    		"fs/app/block",		// /app/blocks/Block.wax
-    		"fs/wax/block",			// /wax/blocks/Block.wax
+        	"fs/app/appblock",				// /app/Block.wax
+    		"fs/app/block",					// /app/blocks/Block.wax
+    		"fs/wax/block",					// /wax/blocks/Block.wax
+			"fs/wax/blockdir/ver/appblock"	// /wax/blocks/1.0/Block.wax
         );
         
         // blocks to autoload (plugins/libraries/themes)
         public static $autoload = array(
-        	"mvc",		// allows for MVC based web development
-        	"default"   // default HTML themes for wax
+        	"webcore",		// base libraries for web development
         );
+		
+		public static function Info() { 
+			return array(
+				"version" => self::$version,
+				"paths" => self::$paths,
+				"blockpath" => self::$blockpath,
+				"autoload" => self::$blockpath
+			); 
+		}
 	}
 ?>

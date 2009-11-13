@@ -1,5 +1,5 @@
 <?php
-	class DBModel extends Model implements DBCRUD,View {
+	class DBModel extends Model implements rDBCRUD,rView {
 		var $pk = "id";
 		var $id = NULL;
 		var $data = array();

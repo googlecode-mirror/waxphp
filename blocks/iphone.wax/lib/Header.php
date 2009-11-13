@@ -1,5 +1,5 @@
 <?php
-	class HeaderController extends DCIObject implements View {
+	class HeaderController extends DCIObject implements rView {
 		function __construct($title) {
 			parent::__construct(); // initialize parent- need to for injection
 			
