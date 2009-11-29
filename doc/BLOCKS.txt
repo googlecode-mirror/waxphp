@@ -1,0 +1,5 @@
+BLOCKS
+-----------------------------------------------------------
+
+Blocks are the standard way to group resources together 
+in Wax.  
