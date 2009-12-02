@@ -33,7 +33,14 @@
     			echo $renderer->Render($app->views("header"),$dhtmlresources);
     	    }
     	    catch (ViewNotFoundException $vnfe) {
-	            echo "View 'header.view.php' could not be found in $dirname/views/header.view.php<br />";
+    	        // try loading the one from webcore
+    	        try {
+    	            $webcore = BlockManager::GetBlock("webcore");
+    	            echo $renderer->Render($webcore->views("header"),$dhtmlresources);
+    	        }
+    	        catch (ViewNotFoundException $vnfe2) {
+	                echo "View 'header.view.php' could not be found in $dirname/views/header.view.php<br />";
+	            }
     	    }
 			    
 			$self->Route();
@@ -53,11 +60,18 @@
 			}
 			
 			try {
-			    echo $renderer->Render($app->views("footer"));
-			}
-			catch (ViewNotFoundException $vnfe) {
-			    echo "View 'footer.view.php' could not be found in $dirname/views/footer.view.php<br />";
-			}
+    			echo $renderer->Render($app->views("footer"),$dhtmlresources);
+    	    }
+    	    catch (ViewNotFoundException $vnfe) {
+    	        // try loading the one from webcore
+    	        try {
+    	            $webcore = BlockManager::GetBlock("webcore");
+    	            echo $renderer->Render($webcore->views("footer"),$dhtmlresources);
+    	        }
+    	        catch (ViewNotFoundException $vnfe2) {
+	                echo "View 'footer.view.php' could not be found in $dirname/views/footer.view.php<br />";
+	            }
+    	    }
 		}
 	}
 

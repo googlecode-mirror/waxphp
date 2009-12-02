@@ -229,6 +229,7 @@
 		* @return array A list of all roles 'implemented' by the class
 		*/
 		private function reflectRoles() {
+		    /*
 			$matches = array();
 			$reflection = Reflection::export(new ReflectionClass(get_class($this)),true);
 			preg_match_all("/implements ([\w\s,]+)\]/",$reflection,$matches);
@@ -239,6 +240,8 @@
 				return $interfaces[0];
 			}
 			return array();
+			*/
+			return class_implements($this);
 		}
 		
 		// checks whether or not it's possible for this Model to perform $action

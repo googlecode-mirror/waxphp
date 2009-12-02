@@ -101,7 +101,7 @@
 			echo($exception->__toString());
 		}
 		catch (Exception $e) {
-			die(get_class($e) . " thrown within the exception handler. <br />" .
+			echo (get_class($e) . " thrown within the exception handler. <br />" .
 			    $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine() . "<br />");
 		}
 	}

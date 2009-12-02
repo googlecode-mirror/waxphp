@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Wax Sample Website: Message Board</title>
+		<title>Wax Sample Website</title>
 		<?php foreach ($css as $css_address): ?>
 		<link rel='stylesheet' type='text/css' href='<?=$css_address?>' />
 		<?php endforeach; ?>
@@ -14,23 +14,11 @@
 	
 	<div class='pagewrapper'>
 		<div class='header'>
-			<div class='sidebar'>	
-				<div class='logo'>
-					<a href='index.php'>
-						<img src='<?=get_resource_from("images","logo_standard")?>' />
-					</a>
-				</div>
-				<b>Wax PHP Framework</b><br />
-				<span style='font-size:8pt;'>
-					v<?=Wax::Version()?><br />
-					&copy; 2009
-				</span>
-				<br />
-			</div>
 			<div class='navigation'>
 				<ul class='wnavlist'>
-					<li><a href='index.php'>Home</a></li>
-					<li><a href='index.php?action=new'>New Post</a></li>
+					<li><?php echo $self->Link("Home", array('controller' => 'Home')); ?></li>
+					<li><?php echo $self->Link("Walkthrough", array('controller' => 'Walkthrough')); ?>
+					<li><?php echo $self->Link("Runtime Info", array('controller' => 'Home', 'action' => 'runtime')); ?></li>
 				</ul>
 			</div>
 		</div>

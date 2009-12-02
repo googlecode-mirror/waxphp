@@ -2,7 +2,7 @@
 	// the roles for rendering views
 	interface rView {}
 	
-	class ViewNotFoundException extends WaxException {
+	class ViewNotFoundException extends ResourceNotFoundException {
 		function __construct($viewname) {
 			parent::__construct("View Not Found","View '$viewname' could not be found.");
 		}
