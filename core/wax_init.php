@@ -6,10 +6,10 @@
     ////////////////////////////////////////////////////
     
     // Framework Configuration -- DO NOT EDIT!!!
-    require_once(dirname(__FILE__) . "/wax/include/lib.php");
-    require_dir(dirname(__FILE__) . "/wax/include");
-    require_dir(dirname(__FILE__) . "/wax/managers");
-    require_dir(dirname(__FILE__) . "/wax/lib");
+    require_once(dirname(__FILE__) . "/include/lib.php");
+    require_dir(dirname(__FILE__) . "/include");
+    require_dir(dirname(__FILE__) . "/managers");
+    require_dir(dirname(__FILE__) . "/lib");
     
 	// start up wax, yield to application
 	@session_start();		// start up a session
