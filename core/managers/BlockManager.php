@@ -65,7 +65,7 @@
     			foreach ($pathparts as $part) {
     				if (strpos($part,".wax") !== false) {
     				    $parts = explode(".",$part);
-    					$block = Wax::GetBlock(array_shift($parts));
+    					$block = self::GetBlock(array_shift($parts));
     					if (!is_null($block)) {
     					    self::$_pathcache[$filename] = $block;
     						return $block;

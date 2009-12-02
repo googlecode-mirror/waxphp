@@ -13,6 +13,14 @@
 			);
 		}
 	}
+	class ResourceNotFoundInException extends WaxException {
+		function __construct($type, $resource, $block) {
+			parent::__construct(
+				"Resource $resource not found in {$block->name}/$type",
+				print_r($block->GetResources(),true)
+			);
+		}
+	}
 	class BlockNotFoundException extends WaxException {
 	    function __construct($path) {
 	        parent::__construct("WaxBlock not found: $path","");
@@ -35,7 +43,6 @@
 		    if (!is_dir($blockpath))
 		        throw new BlockNotFoundException($blockpath);
 		        
-		    
 			$info = pathinfo($blockpath);
 			$this->_blockdir = $info['dirname'] . "/" . $info['basename'];
 			$this->name = $info['filename'];
@@ -150,7 +157,7 @@
 				if (isset($this->_resources[$func][$arg])) {
 				    return $this->_resources[$func][$arg];
 				}
-				else throw new ResourceNotFoundException($func,$this);
+				else throw new ResourceNotFoundInException($func,$arg,$this);
 			}
 			else throw new ResourceNotFoundException($func,$this);
 		}

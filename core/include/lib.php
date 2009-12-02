@@ -22,26 +22,10 @@
             }
         }
     }
-
-	/**
-	* Takes the name and parent block of a view and renders it.
-	*
-	* @param string $view The name of the view to render
-	* @param array $arguments The list of arguments to pass to the view
-	* @param string $blockname The parent block of the view to render
-	* @param bool $return Whether or not to return the view results or just print them out
-	* @return mixed if {@link $return} is set to true, returns the rendered view, otherwise returns nothing
-	*/
-	function render($view, $arguments, $blockname, $return = false) {
-		$block = Wax::GetBlock($blockname);
-		if (!is_null($block)) {
-			$viewfile = $block->views($view);
-			$r = new Renderer();
-			$buf = $r->Render($viewfile,$arguments);
-			if ($return) return $buf;
-			else echo $buf;
-		}
-	}
+    
+    function wax_error($title, $message, $code = E_USER_NOTICE) {
+        trigger_error($title . ": " . $message, $code);
+    }
 	
 	/**
 	* Gets a resource from a given block

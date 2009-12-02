@@ -28,7 +28,7 @@
 	class SessionArr extends ArraySurrogate {
 		function __construct($parent) {
 			parent::__construct($parent);
-			@session_start();
+			session_start();
 		}
 		function Set($index,$val) {
 			session_register($index,$val);

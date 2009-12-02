@@ -50,6 +50,7 @@
 				$msgbuf .= "<pre>";
 				$trace = $this->getTrace();
 				
+				$msgbuf .= $this->getFile() . ":" . $this->getLine() . "<br />";
 				foreach ($trace as $tr) {
 				    if (isset($tr['file']) && strpos($tr['file'],'DCIObject') === false) {
 				        $msgbuf .= $tr['file'] . ":" . $tr['line'] . "<br />";
@@ -68,7 +69,7 @@
 				        $this->file . ":" . $this->line . "<br />" . 
 				        $this->title . (!empty($this->details) ? ": " . $this->details : "") . "<br /><br />" . 
 				        "<b>Backtrace:</b><br />";
-				foreach ($this->getTrace() as $tr) {
+				foreach ($this->getTrace() as $index => $tr) {
 				    if (isset($tr['file']) && strpos($tr['file'],'DCIObject') === false) {
 				        $return .= $tr['file'] . ":" . $tr['line'] . "<br />";
 				    }
@@ -79,8 +80,16 @@
 	}
 	
 	function wax_error_handler($code, $message, $file, $line) {
-	    @ob_end_flush();
-	    throw new WaxException("Uncaught Exception",$message, $code, $file, $line);
+        @ob_end_flush();
+	    switch ($code) {
+	        case E_NOTICE:
+	        break;
+	        case E_USER_NOTICE:
+	            echo "<span class='wax_notice'>WAX ERROR: $message @ $file:$line</span><br />";
+	        break;
+	        default:
+        	    throw new WaxException("Uncaught Error ($code)",$message, $code, $file, $line);
+	    }
 	}
 	
 	function wax_exception_handler($exception) {
