@@ -2,13 +2,6 @@
 	// the base persistence model class
 	// forms a base for models that communicate with databases, 
 	// specifically couchdb
-	
-	// supporting role functions are
-	// 		- init		(connecting, etc.)
-	//		- save		(update an entry)
-	//		- create	(create an entry)
-	//		- delete 	(delete an entry)
-	//		- read		(get an entry)
 	class PersistenceModel extends ArraySurrogate {
 		private $_initial_keys = array();
 		function __construct($id = null) {
@@ -22,8 +15,10 @@
 				$this->_arrayref['type'] = $this->type();
 			
 			// call an initialization function if it exists
-			if ($this->TryTo("Init"))
+			try {
 				$this->Init();
+			}
+			catch (MethodNotFoundException $mnfe) {}
 		}
 		function update($data) {
 			$this->_arrayref = $data;

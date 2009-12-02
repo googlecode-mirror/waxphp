@@ -9,6 +9,11 @@
 			parent::__construct("Class '" . (empty($controller) ? "<i>Unknown</i>" : $controller) . "Controller' Not Found","You may need to create it or import its parent block.");
 		}
 	}
+	class ApplicationNotFoundException extends WaxException {
+	    function __construct($dirname) {
+	        parent::__construct("Application not Found","'$dirname' does not contain a valid Wax application<br />");
+	    }
+	}
 	
 	// rAppController provides initialization and routing functions
 	class rAppControllerActions {
@@ -17,6 +22,9 @@
 		
 		static function AppInit(rAppController $self, $dirname) {
 			// get all of the JS and CSS that various blocks have loaded
+			if (empty($dirname) || !is_dir($dirname)) {
+			    throw new ApplicationNotFoundException($dirname);
+			}
 			$app = BlockManager::LoadBlockAt($dirname);
 			$dhtmlresources = BlockManager::GetDHTMLResources();
 			

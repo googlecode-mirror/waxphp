@@ -24,8 +24,7 @@
 			$self->properties['request'] =& $_REQUEST;
 			$self->files = new FilesArr($_FILES);
 			$self->cookie = new CookiesArr($_COOKIE);
-			echo "session disabled (rController:33)<br />";
-			// $self->session = new SessionArr($_SESSION);
+			$self->session = new SessionArr($_SESSION);
 			
 			$self->view = new ArraySurrogate();
 		}
