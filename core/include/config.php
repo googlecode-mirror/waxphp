@@ -88,6 +88,7 @@
 		*/
         public static $autoload = array(
         	"webcore",		// base libraries for web development
+            "messageboxes"
         );
 
 		/**
