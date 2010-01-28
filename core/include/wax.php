@@ -18,7 +18,7 @@
                 set_error_handler("wax_error_handler");
 				set_exception_handler("wax_exception_handler");
 				
-                WaxConf::$paths['wax'] = str_replace($_SERVER['DOCUMENT_ROOT'],'',dirname(__FILE__));
+                WaxConf::$paths['wax'] = str_replace(array($_SERVER['DOCUMENT_ROOT'],"/core/include"),'',dirname(__FILE__));
 				WaxConf::$paths['app'] = str_replace($_SERVER['DOCUMENT_ROOT'],'',$dir);
 				
             	// pre-parse the paths array for fast path lookups

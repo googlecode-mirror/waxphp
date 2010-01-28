@@ -6,6 +6,12 @@
     ////////////////////////////////////////////////////
     
     // Framework Configuration -- DO NOT EDIT!!!
+    if (defined("WAX_LOADED")) {
+        die("ERROR: Wax is being loaded again from " . getcwd());
+    }
+    
+    define("WAX_LOADED",true);
+    
     require_once(dirname(__FILE__) . "/include/lib.php");
     require_dir(dirname(__FILE__) . "/include");
     require_dir(dirname(__FILE__) . "/managers");

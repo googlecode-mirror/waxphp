@@ -44,6 +44,7 @@
     				$block = BlockManager::GetBlock("messageboxes");
     				$view = $block->views("exception");
     				$renderer = new View();
+    				$renderer->AddRole("rFlash");
 
     				$msgbuf = "<i>" . $this->details . "</i><br /><br />";
     				$msgbuf .= "An uncaught exception has occurred in: <br />";
@@ -58,7 +59,6 @@
     				}
 
     			    $msgbuf .= "</pre>";
-
     				$result = $renderer->RenderMessage('error',$this->title,$msgbuf);
     			}
     			catch (WaxException $vnfe) {

@@ -7,13 +7,10 @@
 	
 	class ResourceNotFoundException extends WaxException {
 		function __construct($resource, $block) {
-			parent::__construct(
-				"Resource $resource not found in {$block->name}",
-				print_r($block->GetResources(),true)
-			);
+			parent::__construct("Resource $resource not found in {$block->name}","<pre>" . print_r($block,true) . "</pre>");
 		}
 	}
-	class ResourceNotFoundInException extends WaxException {
+	class ResourceNotFoundInException extends ResourceNotFoundException {
 		function __construct($type, $resource, $block) {
 			parent::__construct(
 				"Resource $resource not found in {$block->name}/$type",

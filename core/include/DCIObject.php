@@ -7,7 +7,6 @@
 	* reflection, static context redirection, and determining if
 	* a role or role action can be played/performed
 	*/
-	require_once dirname(__FILE__) . "/exceptions.php";
 	
 	/**
 	* The base DCIObject class
@@ -60,10 +59,12 @@
 			    $this->roles[$role]['properties'] = array();
 			    $this->roles[$role]['methods'] = array();
 			    
+			    // store the rolename of the variable
+			    // properties are managed by the DCIObject
     			foreach (get_class_vars($roleclass) as $property => $value) {
     			    $this->roles[$role]['properties'][$property] = $value;
     			    
-    			    if (isset($this->properties[$property]) && is_array($this->properties[$property]))
+    			    if (array_key_exists($property,$this->properties))
     			        $this->properties[$property][] = $role;
     			    else
     			        $this->properties[$property] = array($role);
@@ -72,7 +73,7 @@
     			foreach (get_class_methods($roleclass) as $method) {
     			    $this->roles[$role]['methods'][$method] = true;
     			    
-    			    if (isset($this->methods[$method]) && is_array($this->methods[$method]))
+    			    if (array_key_exists($method,$this->methods))
     			        $this->methods[$method][] = $role;
     			    else
     			        $this->methods[$method] = array($roleclass);
@@ -90,11 +91,11 @@
 		// restrict property access to their creating roles
 		function __get($var) {
 		    if (array_key_exists($var,$this->properties)) {
-		        if (is_null($this->properties[$var])) {
+		        if (count($this->properties[$var]) > 1) {
 		            throw new AmbiguousPropertyException($var);
 		        }
 		        else {
-		            return $this->roles[$this->properties[$var]]['properties'][$var];
+		            return $this->roles[$this->properties[$var][0]]['properties'][$var];
 		        }
 		    }
 		    else {
@@ -103,11 +104,11 @@
 		}
 		function __set($var,$value) {
 		    if (array_key_exists($var,$this->properties)) {
-		        if (is_null($this->properties[$var])) {
+		        if (count($this->properties[$var]) > 1) {
 		            throw new AmbiguousPropertyException($var);
 		        }
 		        else {
-		            return $this->roles[$this->properties[$var]]['properties'][$var] = $value;
+		            return $this->roles[$this->properties[$var][0]]['properties'][$var] = $value;
 		        }
 		    }
 		    else {
@@ -116,12 +117,12 @@
 		}
 		function __call($func, $args) {
 		    if (isset($this->methods[$func])) {
-		        if (is_null($this->methods[$func])) {
+		        if (count($this->methods[$func]) > 1) {
 		            throw new AmbiguousMethodException($func);
 		        }
 		        else {
 		            array_unshift($args, $this);
-		            return call_user_func_array(array($this->methods[$func],$func),$args);
+		            return call_user_func_array(array($this->methods[$func][0],$func),$args);
 		        }
 		    }
 		    else {

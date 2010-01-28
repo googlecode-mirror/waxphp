@@ -28,7 +28,7 @@
     	        	return self::LoadBlockAt($path);
     	        }
     	        catch (BlockNotFoundException $e) {
-    	            throw new BlockNotFoundException($block . " in " . $e->getMessage());
+    	            throw new BlockNotFoundException($block);
     	        }
 	        }
         }
