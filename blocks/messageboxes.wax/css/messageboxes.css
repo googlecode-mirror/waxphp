@@ -31,27 +31,28 @@
   font-family:"Monaco","Courier New",mono !important;
 }
 
+
 .error {
-	 background			: #FEADAD url(../images/error.png) no-repeat scroll 10px 10px; 
+	 background	: #FEADAD url(../images/error.png) no-repeat scroll 10px 10px; 
 }
 .error pre { 
-    background: #FE8080; 
+    background : #FE8080; 
 }
 .info {
-	  background			: #A9D1FE url(../images/info.png) no-repeat scroll 10px 10px; 
+	  background : #A9D1FE url(../images/info.png) no-repeat scroll 10px 10px; 
 }
 .info pre { 
-    background: #80B0FE; 
+    background : #80B0FE; 
 }
 .warning {
-	background			: #FFFFA9 url(../images/warning.png) no-repeat scroll 10px 10px; 
+	background : #FFFFA9 url(../images/warning.png) no-repeat scroll 10px 10px; 
 }
 .warning pre {
-  background: #FFFF80;
+  background : #FFFF80;
 }
 .success {
-	background			: #9FFA9F url(../images/success.png) no-repeat scroll 10px 10px; 
+	background : #9FFA9F url(../images/success.png) no-repeat scroll 10px 10px; 
 }
 .success pre {
-  background: #80F080;
+  background : #80F080;
 }
