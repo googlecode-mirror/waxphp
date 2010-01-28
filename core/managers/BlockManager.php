@@ -23,8 +23,13 @@
         	if (isset(Wax::$loaded_blocks[$block]))
         		return Wax::$loaded_blocks[$block];
         	else {
-	        	$path = self::findBlock($block);
-	        	return self::LoadBlockAt($path);
+        	    try {
+    	        	$path = self::findBlock($block);
+    	        	return self::LoadBlockAt($path);
+    	        }
+    	        catch (BlockNotFoundException $e) {
+    	            throw new BlockNotFoundException($block . " in " . $e->getMessage());
+    	        }
 	        }
         }
         

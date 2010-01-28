@@ -12,11 +12,9 @@
     *
     * @author Joe Chrzanowski
     */
-	class ArraySurrogate extends DCIObject implements ArrayAccess {
+	class ArraySurrogate implements ArrayAccess {
 		protected $_arrayref = NULL;
-		function __construct($parent = null, $reference = true) { 
-			parent::__construct();
-			
+		function __construct($parent = null, $reference = true) { 			
 			if (!is_null($parent) && $reference)
 				$this->_arrayref =& $parent; 
 			else if (!is_null($parent))

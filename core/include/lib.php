@@ -42,4 +42,34 @@
 			return $item;
 		else return '';
 	}
+	
+	/**
+	* Generates a URL to a resource in the application
+	*/
+	function url_to($action = NULL, $controller = NULL, $args = NULL) {
+	    $base = str_replace($_SERVER['QUERY_STRING'],'',$_SERVER['REQUEST_URI']);
+	    $base = array($base);
+	    if (is_null($controller)) {
+	        $xqs = explode("/",$_SERVER['QUERY_STRING']);
+	        $base[] = array_shift($xqs);
+	    }
+	    else
+	        $base[] = $controller;
+	    
+	    if (!is_null($action)) $base[] = $action;
+	    
+	    if (!is_null($args) && is_array($args)) {
+	        foreach ($args as $key => $value) {
+	            $base[] = "$key:$value";
+	        }
+	    }
+	    
+	    return str_replace("//","/",implode("/",$base));
+	}
+	function link_to($text, $action = NULL, $controller = NULL, $args = NULL, $attribs = array()) {
+	    foreach ($attribs as $name => $value) {
+	        $attribs[$name] = "$name='" . $value . "'";
+	    }
+	    return "<a href='" . url_to($action,$controller,$args) . "' " . implode(" ",$attribs) . ">" . $text . "</a>";
+	}
 ?>
