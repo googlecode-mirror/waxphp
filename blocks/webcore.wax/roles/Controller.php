@@ -4,6 +4,12 @@
 	// controllers by default are able to render views
 	interface rController extends rView {}
 	
+	class ParameterNotFoundException extends WaxException {
+	    function __construct($parameter) {
+	        parent::__construct("Parameter Not Found: $parameter","Parameter was not found.");
+	    }
+	}
+	
 	class rControllerActions {
 		// role properties
 		var $get;
@@ -19,9 +25,9 @@
 		// role methods
 		static function init(rController $self) {
 		    // manually set these properties...
-			$self->properties['get'] =& $_GET;
-			$self->properties['post'] =& $_POST;
-			$self->properties['request'] =& $_REQUEST;
+			$self->get = $_GET;
+			$self->post = $_POST;
+			$self->request = $_REQUEST;
 			$self->files = new FilesArr($_FILES);
 			$self->cookie = new CookiesArr($_COOKIE);
 			$self->session = new SessionArr($_SESSION);
@@ -53,6 +59,14 @@
 			$viewname = $ctrl_name . "/" . $action;
 			
 			echo $self->Render($block->views($viewname), $self->view->ToArray());
+		}
+		
+		static function redirect_to($self, $action = NULL, $controller = NULL, $args = NULL) {
+		    // redirect the user somewhere else
+		    header("Location: " . url_to($action,$controller,$args));
+		    echo "<meta http-equiv='refresh' content='3;url=" . url_to($action,$controller,$args) . "' />";
+		    echo "<script type='text/javascript'>location.href='" . url_to($action,$controller,$args) . "';</script>";
+		    exit;
 		}
 	}
 ?>

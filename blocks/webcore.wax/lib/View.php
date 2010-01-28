@@ -5,5 +5,13 @@
 	//  	ex:
 	//			$renderer = new View();
 	//			$renderer->Render(...);
-	class View extends DCIObject implements rView {}
+	class View extends DCIObject implements rView {
+	    var $buf = "";
+	    function write($str) {
+	        $this->buf .= $str;
+	    }
+	    function __destruct() {
+	        echo $this->buf;
+	    }
+	}
 ?>
