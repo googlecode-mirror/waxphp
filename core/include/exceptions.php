@@ -15,6 +15,9 @@
     		protected $code = 0;
     		protected $file = '';
     		protected $line = 0;
+    		
+    		protected $view = array();
+    		protected $viewfile = '';
 
     		/**
     		* Default exception constructor.  Receives the title and a textual
@@ -39,43 +42,29 @@
     		* isn't found, it simply returns a textual representation
     		*/
     		function __toString() {
-    			try {
-    				// find default exception view:
-    				$block = BlockManager::GetBlock("messageboxes");
-    				$view = $block->views("exception");
-    				$renderer = new View();
-    				$renderer->AddRole("rFlash");
+    			$msgbuf = $this->title . "<br /><i>" . $this->details . "</i><br /><br />";
+				$msgbuf .= "An uncaught exception has occurred in: <br />";
+				$msgbuf .= "<pre>";
+				$trace = $this->getTrace();
 
-    				$msgbuf = "<i>" . $this->details . "</i><br /><br />";
-    				$msgbuf .= "An uncaught exception has occurred in: <br />";
-    				$msgbuf .= "<pre>";
-    				$trace = $this->getTrace();
+                $tracelines = array();
+                /* Ignore the files that handle function redirection- they throw the exceptions but they're irrelevant here. */
+                if (strpos($this->getFile(),'DCIObject') === false && strpos($this->getFile(),'WaxBlock') === false)
+				    $tracelines[] = $this->getFile() . ":" . $this->getLine();
+				    
+				foreach ($trace as $tr) {
+				    if (isset($tr['file']) && (1 || (
+				        strpos($tr['file'],'DCIObject') === false && 
+				        strpos($tr['file'],'WaxBlock') === false
+				    ))) {
+				        $tracelines[] = $tr['file'] . ":" . $tr['line'];
+				    }
+				}
+				$tracelines[0] = "<b>$tracelines[0]</b>";
+				$msgbuf .= implode("<br />",$tracelines);
 
-    				$msgbuf .= $this->getFile() . ":" . $this->getLine() . "<br />";
-    				foreach ($trace as $tr) {
-    				    if (isset($tr['file']) && strpos($tr['file'],'DCIObject') === false) {
-    				        $msgbuf .= $tr['file'] . ":" . $tr['line'] . "<br />";
-    				    }
-    				}
-
-    			    $msgbuf .= "</pre>";
-    				$result = $renderer->RenderMessage('error',$this->title,$msgbuf);
-    			}
-    			catch (WaxException $vnfe) {
-    				// if no view found, print out simple text
-    				$this->details = (is_array($this->details) ? "<pre>" . print_r($this->details,true) . "</pre>": $this->details);
-
-    				$return = ($this->code > 0 ? "( " . $this->code . " ) " : "") . 
-    				        $this->file . ":" . $this->line . "<br />" . 
-    				        $this->title . (!empty($this->details) ? ": " . $this->details : "") . "<br /><br />" . 
-    				        "<b>Backtrace:</b><br />";
-    				foreach ($this->getTrace() as $index => $tr) {
-    				    if (isset($tr['file']) && strpos($tr['file'],'DCIObject') === false) {
-    				        $return .= $tr['file'] . ":" . $tr['line'] . "<br />";
-    				    }
-    				}
-    				return $return;
-    			}
+			    $msgbuf .= "</pre>";
+			    return $msgbuf; 
     		}
     	}
 	
@@ -85,7 +74,7 @@
 	        case E_NOTICE:
 	        break;
 	        case E_USER_NOTICE:
-	            echo "<span class='wax_notice'>WAX ERROR: $message @ $file:$line</span><br />";
+	            echo "<span class='wax_notice'>WAX Error: $message @ $file:$line</span><br />";
 	        break;
 	        default:
         	    throw new WaxException("Uncaught Error ($code)",$message, $code, $file, $line);
@@ -108,6 +97,17 @@
 	
 	class DCIException extends WaxException {}
 	
+	class KeyNotFoundException extends WaxException {
+	    function __construct($key,$arr) {
+	        parent::__construct("Key not found","Key: '$key' not found in: <pre>" . print_r($arr,true) . "</pre>");
+	    }
+	}
+	
+	class ContextActionNotFoundException extends WaxException {
+	    function __construct($context, $action) {
+	        parent::__construct("$action not found","$action was not found in context $context");
+	    }
+	}               
 	/**
 	* Thrown when a role method is called that doesn't exist.
 	*/
@@ -138,16 +138,30 @@
 	* Called when a property is defined in multiple roles
 	*/
 	class AmbiguousPropertyException extends DCIException {
-	    function __construct($property) {
-	        parent::__construct("Ambiguous Property: $property","Property $property found in multiple roles.");
+	    var $implemented_in;
+	    var $property;
+	    function __construct($property,$implemented_in) {
+	        $this->implemented_in = $implemented_in;
+	        $this->property = $property;
+	        parent::__construct("Ambiguous Property: $property","Property $property found in multiple roles: <pre>" . print_r($implemented_in,true) . "</pre>");
 	    }
 	}
 	/**
 	* Called when a property is defined in multiple roles
 	*/
 	class AmbiguousMethodException extends DCIException {
-	    function __construct($method) {
-	        parent::__construct("Ambiguous Method: $method","Method $method found in multiple roles.");
+	    var $implemented_in;
+	    var $method;
+	    function __construct($method,$implemented_in) {
+	        $this->implemented_in = $implemented_in;
+	        $this->method = $method;
+	        parent::__construct("Ambiguous Method: $method","Method $method found in multiple roles: <pre>" . print_r($implemented_in,true) . "</pre>");
 	    }
 	}
+	
+	class ContextNotFoundException extends WaxException {
+        function __construct($ctx,$grpname) {
+            parent::__construct("Context: $ctx Not Found","Could not execute $ctx in Context Group: " . $grpname);
+        }
+    }
 ?>

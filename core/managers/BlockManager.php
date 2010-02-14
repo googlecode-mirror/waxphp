@@ -23,13 +23,8 @@
         	if (isset(Wax::$loaded_blocks[$block]))
         		return Wax::$loaded_blocks[$block];
         	else {
-        	    try {
-    	        	$path = self::findBlock($block);
-    	        	return self::LoadBlockAt($path);
-    	        }
-    	        catch (BlockNotFoundException $e) {
-    	            throw new BlockNotFoundException($block);
-    	        }
+	        	$path = self::findBlock($block);
+	        	return self::LoadBlockAt($path);
 	        }
         }
         
@@ -52,23 +47,36 @@
         static function GetBlockFromContext($filename = NULL) {
 			$classname = NULL;
 			
+			// if we're getting the block context of an object,
+			// we need to backtrace to the file where the class
+			// is declared and get the block from the path of that file.
 			if (is_object($filename)) {
 			    // look thru the backtrace
 			    $bt = debug_backtrace();
-			    $frame = array_pop($bt);
-			    $filename = $frame['file'];
+			    $lookfor = get_class($filename);
+			    
+			    $filename = array_shift($bt);
+			    while ($filename['file'] != $lookfor && count($bt) > 0)
+			        $filename = array_shift($bt);
+			        
+			    $filename = $filename['file'];
 			}
 			
+			// cache blocks located at certain locations
 			if (isset(self::$_pathcache[$filename]))
 			    return self::$_pathcache[$filename];
 			
-			// parse out the block...
+			// parse out the block from the filename (Looks for .wax extension)
 			if (file_exists($filename)) {
     			$info = pathinfo($filename);
     			$pathparts = array_reverse(explode("/",$info['dirname']));
     			
     			foreach ($pathparts as $part) {
     				if (strpos($part,".wax") !== false) {
+    				    // at this point we've found a path ending in .wax
+    				    // which represents the deepest level block: 
+    				    // example: /app.wax/blocks/someblock.wax/views/layout.view.php
+    				    // will return the someblock.wax block rather than app.wax
     				    $parts = explode(".",$part);
     					$block = self::GetBlock(array_shift($parts));
     					if (!is_null($block)) {
@@ -83,25 +91,15 @@
 			self::$_pathcache[$filename] = NULL;
 			return NULL;
         }
-		static function GetBlocknameFromPath($path) {
-			$matches = array();
-			preg_match_all("/(\w+)\.wax/",$path,$matches);
-			if (isset($matches[1][0])) {
-				$blockname = $matches[1][0];
-				$block = $blockname;
-				return $block;
-			}
-			else return NULL;
-		}
-
+        
 		// get all css or js from all loaded blocks -- for header printing mostly
 		static function GetDHTMLResources($ret_only = NULL) {
-			$ret = array();
+			$ret = array('js' => array(), 'css' => array());
 			foreach (self::GetLoadedBlocks() as $name => $block) {
-				foreach ($block['js'] as $script) {
+				foreach ($block->js as $script) {
 					$ret['js'][] = $script;
 				}
-				foreach ($block['css'] as $css) {
+				foreach ($block->css as $css) {
 					$ret['css'][] = $css;
 				}
 			}

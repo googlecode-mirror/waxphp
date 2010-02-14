@@ -16,7 +16,7 @@
         public static $version = array(
         	"version"	=> 0,	// major release version
         	"revision"  => 9,	// minor version
-        	"build" 	=> 0	// update number
+        	"build" 	=> 3	// update number
         );
         
 
@@ -83,12 +83,23 @@
 			"fs/wax/blockdir/ver/appblock"	// /wax/blocks/1.0/Block.wax
         );
         
+        /** 
+        * the central database configuration list. 
+        **/
+        public static $database = array(
+            "default_mysql" => array(
+                'username' => 'root',
+                'password' => '',
+                'host' => "127.0.0.1",
+                'db' => 'wax'
+            )
+        );
+        
         /**
 		* blocks to autoload (plugins/libraries/themes)
 		*/
         public static $autoload = array(
-        	"webcore",		// base libraries for web development
-            "messageboxes"
+        	"mvc",		// base libraries for web development
         );
 
 		/**

@@ -19,6 +19,7 @@
     
 	// start up wax, yield to application
 	@session_start();		// start up a session
+	ob_start();
     error_reporting(E_ALL); // enable error reporting
     Wax::Init(getcwd());	// init wax from the current working directory (which is presumably where the app is)
 ?>

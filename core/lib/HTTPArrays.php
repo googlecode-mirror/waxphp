@@ -5,6 +5,7 @@
 	*/
 	class FilesArr extends ArraySurrogate {
 		function Set($index, $val) {
+		    // the files array is read-only
 			return;
 		}
 	}
@@ -27,12 +28,11 @@
 	*/
 	class SessionArr extends ArraySurrogate {
 		function __construct($parent) {
-			parent::__construct($parent);
-			session_start();
-		}
-		function Set($index,$val) {
-			session_register($index,$val);
-			parent::Set($index,$val);
+		    @session_start();
+			parent::__construct($parent); 
+			// the $_SESSION array automatically handles registering variables--
+			// this class just makes sure that a session is started before trying
+			// to modify the array.
 		}
 	}
 ?>

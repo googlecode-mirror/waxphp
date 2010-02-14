@@ -7,15 +7,7 @@
 	
 	class ResourceNotFoundException extends WaxException {
 		function __construct($resource, $block) {
-			parent::__construct("Resource $resource not found in {$block->name}","<pre>" . print_r($block,true) . "</pre>");
-		}
-	}
-	class ResourceNotFoundInException extends ResourceNotFoundException {
-		function __construct($type, $resource, $block) {
-			parent::__construct(
-				"Resource $resource not found in {$block->name}/$type",
-				print_r($block->GetResources(),true)
-			);
+			parent::__construct("$resource not found", "<pre>" . print_r($block->_resources['views'],true) . "</pre>");
 		}
 	}
 	class BlockNotFoundException extends WaxException {
@@ -24,8 +16,8 @@
 	    }
 	}
 	
-	class WaxBlock extends ArraySurrogate {
-		private $_resources = array(
+	class WaxBlock {
+		var $_resources = array(
 			'views' => array(),
 			'js' => array(),
 			'css' => array(),
@@ -44,14 +36,15 @@
 			$this->_blockdir = $info['dirname'] . "/" . $info['basename'];
 			$this->name = $info['filename'];
 			$this->loadResources($blockpath, $include_files);
-			
-			parent::__construct($this->_resources, true);
 		}
 		
 		private function loadResources($dir, $include_files = false) {
-			$dhtml = array("js","css","images");            // creates web-relative paths
-			$php = array("blocks","roles","views","include","lib");  // creates fs-absolute paths
+			$dhtml = array("js","css","images");                                // creates web-relative path refs
+			$php = array("blocks","roles","views","include","lib","contexts");  // creates fs-absolute path refs
 			
+			// resource loading loop--
+			// determines all javascript, css, and image resources
+			// in the current block.
 			foreach ($dhtml as $resourcedir) {
 			    if (is_dir("$dir/$resourcedir")) {
 			        foreach (scandir("$dir/$resourcedir") as $file) {
@@ -66,12 +59,18 @@
 			    }
 			}
 			
+			// library loading loop--
+			// determines all libraries, objects, roles, contexts, etc.
+			// that need to be require()'d for this block to work like
+			// it should.
 			foreach ($php as $resourcedir) {
-			    if (is_dir("$dir/$resourcedir")) {
-			        // these aren't resources, they're just meant for inclusion
-			        // we still need to note their block context though
+			    if (is_dir("$dir/$resourcedir")) {			        
 			        switch ($resourcedir) {
+			            // these are all treated the same -- 
+			            // the only thing that matters is the order,
+			            // which is specified in the $php array.
 			            case "lib":
+			            case "contexts":
 			            case "include":
 			                require_dir("$dir/$resourcedir");
 			            break;
@@ -94,32 +93,31 @@
                                 }
                             }
                         break;
+                        
+                        // the idea behind the blocks and roles directories
+                        // is pretty much the same
+                        case "blocks":
 			            case "roles":
-			                foreach (scandir("$dir/$resourcedir") as $role) {
-			                    if ($role[0] == '.' || $role[0] == '_') continue;
+			                foreach (scandir("$dir/$resourcedir") as $obj) {
+			                    if ($obj[0] == '.' || $obj[0] == '_') continue;
+			                    $objname = explode(".",$obj);
 			                    
-			                    $rolename = explode(".",$role);
-			                    $this->_resources["roles"][array_shift($rolename)] = "$dir/$resourcedir/$role";
-			                    require_once "$dir/$resourcedir/$role";
-			                }
-			            break;
-			            case "blocks":
-			                foreach (scandir("$dir/$resourcedir") as $block) {
-			                    if ($block[0] == '.') continue;
+			                    $key = array_shift($objname);
+			                    $objval = "$dir/$resourcedir/$obj";
 			                    
-			                    $blockname = explode(".",$block);
-			                    $this->_resources[$resourcedir][array_shift($blockname)] = BlockManager::LoadBlockAt("$dir/$resourcedir/$block");
+			                    if ($resourcedir == "roles")
+			                        require_once("$dir/$resourcedir/$obj");
+			                    else 
+			                        $objval = BlockManager::LoadBlockAt("$dir/$resourcedir/$obj");
+			                        
+			                    $this->_resources[$resourcedir][$key] = $objval;
 			                }
 			            break;
 			        }
 				}
 			}
 		}
-		
-		function GetResources() {
-			return $this->_resources;
-		}
-		
+
 		function GetResource($type,$name) {
 			if (isset($this->_resources[$type]) && isset($this->_resources[$type][$name])) {
 				return $this->_resources[$type][$name];
@@ -129,39 +127,15 @@
 			}
 		}
 		
-		function Tag($type, $name) {
-		    $resource = $this->GetResource($type,$name);
-		    
-		    switch ($type) {
-		        case "images":
-		            return "<img src='$resource' />";
-		        break;
-		        case "js":
-		            return "<script type='javascript' src='$resource'></script>";
-		        break;
-		        case "css":
-		            return "<link rel='stylesheet' href='$resource' />";
-		        break;
-		        default:
-                    return $resource;
-		    }
-		}
-		
 		function __call($func, $args) {
-			// redirect to the proper array
-			if (isset($this->_resources[$func])) {
-				$arg = $args[0];
-				if (isset($this->_resources[$func][$arg])) {
-				    return $this->_resources[$func][$arg];
-				}
-				else throw new ResourceNotFoundInException($func,$arg,$this);
-			}
-			else throw new ResourceNotFoundException($func,$this);
+			$arg = array_shift($args);
+			return $this->GetResource($func, $arg);
 		}
-		function __get($var) {
-			// return the array
-			if (isset($this->_resources[$var]))
-				return $this->_resources[$var];
+		function __get($resourcetype) {
+		    if (is_array($this->_resources[$resourcetype])) {
+		        return new ArraySurrogate($this->_resources[$resourcetype]);
+		    }
+		    else throw new ResourceNotFoundException($resourcetype,$this);
 		}
 	}
 ?>

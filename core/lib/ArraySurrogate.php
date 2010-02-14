@@ -2,18 +2,19 @@
     /**
     * The ArraySurrogate class is a class that allows this particular object
     * to act as a surrogate to an array.  This allows custom Get/Set methods to be
-    * defined as necessary, like in the case of the $_COOKIE array.
+    * defined as necessary.
     *
-    * The $_COOKIE array is just an array, so to set/unset values, we need to call
-    * the setcookie function.  Instead, we can extends the ArraySurrogate class, reimplement
-    * the Get/Set functions, and we then have direct access to the $_COOKIE array via
-    *
-    * $cookie_surrogate['cookie_name'] = "cookie_value";
+    * For example, this class is used extensively within the DCIObject and WaxBlock classes:
+    * WaxBlock->views['something'] -- allows the variable WaxBlock->views to represent
+    * WaxBlock->_resources['views'] using __get()
     *
     * @author Joe Chrzanowski
     */
-	class ArraySurrogate implements ArrayAccess {
+	class ArraySurrogate implements ArrayAccess, Iterator {
 		protected $_arrayref = NULL;
+		
+		private $iter_position = 0;
+		
 		function __construct($parent = null, $reference = true) { 			
 			if (!is_null($parent) && $reference)
 				$this->_arrayref =& $parent; 
@@ -25,7 +26,10 @@
 		
 		// basic get and set methods
 		function Get($index) {
-			return $this->_arrayref[$index];
+		    if (array_key_exists($index,$this->_arrayref))
+			    return $this->_arrayref[$index];
+			else 
+			    return NULL;
 		}
 		function Set($index,$val) {
 			$this->_arrayref[$index] = $val;
@@ -45,10 +49,29 @@
 			unset($this->_arrayref[$offset]);
 		}
 		
+		// iterator implementation
+        function rewind() {
+            return reset($this->_arrayref);
+        }
+        function current() {
+            return current($this->_arrayref);
+        }
+        function key() {
+            return key($this->_arrayref);
+        }
+        function next() {
+            return next($this->_arrayref);
+        }
+        function valid() {
+            return key($this->_arrayref) !== null;
+        }
+		
+		// returns the array
 		function ToArray() {
 			return $this->_arrayref;
 		}
 		
+		// print_r()'s the array
 		function __toString() {
 			return "<pre>\n" . print_r($this->_arrayref,true) . "</pre>\n";
 		}
