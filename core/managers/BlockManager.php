@@ -5,6 +5,7 @@
 		*/
 		private static $_blockresources = array();
 		private static $_pathcache = array();
+		private static $_loaded_blocks = array();
 		
 		/**
 		* Loads a given block
@@ -20,8 +21,8 @@
         // returns a block by name -- looks thru the blockpath
         // to try and find the block
         static function GetBlock($block) {
-        	if (isset(Wax::$loaded_blocks[$block]))
-        		return Wax::$loaded_blocks[$block];
+        	if (isset(self::$_loaded_blocks[$block]))
+        		return self::$_loaded_blocks[$block];
         	else {
 	        	$path = self::findBlock($block);
 	        	return self::LoadBlockAt($path);
@@ -33,7 +34,7 @@
 				throw new BlockNotFoundException($path);
         	else {
         	    $blockobj = new WaxBlock($path);
-        	    Wax::$loaded_blocks[$blockobj->name] = $blockobj;
+        	    self::$_loaded_blocks[$blockobj->name] = $blockobj;
         	    return $blockobj;
         	}
         }
@@ -41,7 +42,7 @@
         // used mostly for getting all resources needed for an application
         // usually in a header or something of the sort
         static function GetLoadedBlocks($nameonly = false) {
-        	return ($nameonly ? array_keys(Wax::$loaded_blocks) : Wax::$loaded_blocks);
+        	return ($nameonly ? array_keys(self::$_loaded_blocks) : self::$_loaded_blocks);
         }
         // find out which block a file is located in -- doesn't always work
         static function GetBlockFromContext($filename = NULL) {
@@ -121,10 +122,8 @@
 		// searching the $blockpath variable for a given block
         private static function findBlock($block) {
         	foreach (WaxConf::$blockpath as $path) {
-        		$blockloc = PathManager::LookupPath($path,array("block" => $block));
-				if (is_dir($blockloc)) {
-					return $blockloc;
-	        	}
+        	    $check = $path . "/" . $block . ".wax";
+        	    if (is_dir($check)) return $check;
 	        }
 			return NULL;
         }

@@ -1,30 +1,33 @@
 <?php
     class Wax {
-		private static $_init = false;				// boolean value specifying whether the framework has been initialized
-        public static $loaded_blocks = array();		// maintain a list of loaded blocks for caching and efficiency
-
         function __construct() { 
-            throw new WaxException("ERROR: You can't instantiate a WaxConf object"); 
+            $bt = debug_backtrace();
+            $last = array_shift($bt);
+            self::Init(dirname($last['file']));
         }
         
         static function Version() {
             return implode(".",WaxConf::$version);
         }
         
+        // Some aliases to the Managers
+        static function LoadBlock($block) { BlockManager::LoadBlock($block); }
+        static function GetBlock($block) { return BlockManager::GetBlock($block); }
+        static function LoadBlockAt($path) { return BlockManager::LoadBlockAt($path); }
+        
+        static function RegisterDS($ds) { DataSourceManager::Register($name, $obj); }
+        static function DataSource($name = NULL) { return DataSourceManager::Get($name); }
+        ////////////////////////////////
+        
         static function Init($dir) {
-			global $argv, $argc;
-			
-            if (!self::$_init) {
+            if (!WaxConf::$init) {
 				set_exception_handler("wax_exception_handler");
 				
-                WaxConf::$paths['wax'] = str_replace(array($_SERVER['DOCUMENT_ROOT'],"/core/include"),'',dirname(__FILE__));
-				WaxConf::$paths['app'] = str_replace($_SERVER['DOCUMENT_ROOT'],'',$dir);
-				
-            	// pre-parse the paths array for fast path lookups
-                PathManager::PreParse();
+				WaxConf::BlocksAt($dir . "/blocks");
+				WaxConf::BlocksAt(__DIR__ . "/../../blocks");
                 
                 // require Wax core
-                $dir = PathManager::LookupPath('fs/core');
+                $dir = dirname(__FILE__) . "/..";
 				if (is_dir($dir))
 	                require_dir("$dir");
 	                
@@ -32,7 +35,7 @@
 	            BlockManager::Init();
 	            
 	            // ready to go
-                self::$_init = true;
+                WaxConf::$init = true;
             }
         }
     }
