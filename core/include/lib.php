@@ -85,26 +85,20 @@
         die();
     }
 	/**
-	* This is a peculiar and nasty hack...
-	* It allows for explicit role calling within a context,
-	* but uses reflection and some frowned upon practices
-	* to accomplish that...
+	* This allows for explicit role calling within a context,
 	*
 	* contexts can be defined and called inline in this fashion:
 	* $ctxresult = _ctx(function (rRole $object, $arg = "value") use ($object) {
 	*   // context code
 	* });
-	*
-	* or as functions, in this form:
-	* function SomeCtx(rRole $role, $whatever) {
-	* 
-	* }
+    *
+    * Note this uses PHP 5.3's lambda functions and closures to accomplish this.
 	*/
-	function _exctx($exfunc, $name = 'AnonymousContext') {
+	function _inlinectx($exfunc) {
 	    // reflect the function to determine the casted types
 	    $var = new ReflectionFunction($exfunc);
 	    $params = $var->getParameters();
-	    
+
 	    $fallbacks = array();
 	    $types = array();
 	    $args = array();
