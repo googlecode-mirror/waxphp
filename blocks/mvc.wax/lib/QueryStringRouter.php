@@ -1,15 +1,13 @@
 <?php
-    interface rQueryStringRouter {}
-    
-    class rQueryStringRouterActions {
+    class QueryStringRouter extends DCIObject {
         var $breakdown = array("controller","action");
         var $querystring;
         var $controller;
         var $action;
         var $args;
         
-        static function Route($self) {
-            $querystring = $self->querystring;
+        function __construct() {
+            $querystring = $this->querystring;
             
             if (is_null($querystring)) {
                 $querystring = $_SERVER['QUERY_STRING'];
@@ -21,12 +19,12 @@
 				unset($_GET[$querystring]);
 				
 			$parts = explode("/",$querystring);
-			foreach ($self->breakdown as $name) {
+			foreach ($this->breakdown as $name) {
 				$part = array_shift($parts);
 				$_GET[$name] = $part;
 				$_REQUEST[$name] = $_GET[$name];
 				
-			    $self->$name = $_GET[$name];
+			    $this->$name = $_GET[$name];
 			}
 			
 			while ($part = array_shift($parts)) {
@@ -37,6 +35,12 @@
 			
 			// return remaining arguments-- excludes controller/action
 			return $parts;
+        }
+        function GetTargetView() {
+            $controller = $this->controller;
+            $action = $this->action;
+            
+            return (empty($controller) ? "Default" : $controller) . "/" . (empty($action) ? "index" : $action);
         }
     }
 ?>
