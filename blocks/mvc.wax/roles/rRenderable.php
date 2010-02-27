@@ -1,5 +1,8 @@
 <?php
-    interface rRenderable {}
+    interface rRenderable {
+        function GetViewBlock();
+        function GetViewName();
+    }
     
     class ViewNotFoundException extends WaxException {
         function __construct($viewfile) {
@@ -8,19 +11,18 @@
     }
     
     class rRenderableActions {
-        var $block;
-        var $viewname;
-        
-        static function Render(rRenderable $self, $arguments, $return = true) {
+        static function Render(rRenderable $self, $arguments = array()) {
             $viewfile = "";
+            $block = $self->GetViewBlock();
+            $viewname = $self->GetViewName();
             try {
-                $viewfile = $self->block->views[$self->viewname];
+                $viewfile = $block->views[$viewname];
             }
             catch (ResourceNotFoundException $rnfe) {
-                throw new ViewNotFoundException($self->viewname,$self->block->views);
+                throw new ViewNotFoundException($self->GetViewName(),$block->views);
             }
              
-            if (is_string($viewfile) && file_exists($viewfile)) {	
+            if (file_exists($viewfile)) {	
     			if (is_array($arguments)) {
     				foreach ($arguments as $arg => $val) {
     					if (!is_numeric($arg))
@@ -31,19 +33,15 @@
     					}
     				}
     			}
-    			
-    			// the view needs access to its block for resource purposes (images, css, js, mostly)
-    			$block = BlockManager::GetBlockFromContext($viewfile);
 			    
     			ob_start();
     			    require($viewfile);
         			$rendered_view = ob_get_contents();
     			ob_end_clean();
     			
-    			if ($return) return $rendered_view;
-    			else echo $rendered_view;
+    			return $rendered_view;
     		}
-    		else throw new ViewNotFoundException($self->viewname, $self->block->views);
+    		else throw new ViewNotFoundException($viewname, $block->views);
         }
     }
 ?>

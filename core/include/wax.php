@@ -23,6 +23,7 @@
             if (!WaxConf::$init) {
 				set_exception_handler("wax_exception_handler");
 				
+				// register block directories
 				WaxConf::BlocksAt($dir . "/blocks");
 				WaxConf::BlocksAt(__DIR__ . "/../../blocks");
                 

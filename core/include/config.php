@@ -30,11 +30,19 @@
         * the central database configuration list. 
         **/
         public static $database = array(
-            "default_mysql" => array(
-                'username' => 'root',
-                'password' => '',
-                'host' => "127.0.0.1",
-                'db' => 'wax'
+            'mysql' => array(
+                'default' => array(
+                    'dsn' => 'mysql:host=127.0.0.1; dbname=wax',
+                    'username' => 'root',
+                    'password' => '',
+                )
+            ),
+            'sqlite' => array(
+                'default' => array(
+                    'dsn' => 'sqlite:wax_sqlite.sqlite',
+                    'username' => '',
+                    'password' => ''
+                )
             )
         );
         
@@ -43,6 +51,7 @@
 		*/
         public static $autoload = array(
         	"mvc",		// base libraries for web development
+        	"database"
         );
 		
 		/**
@@ -51,11 +60,13 @@
 		public static function Info() { 
 			return array(
 				"version" => self::$version,
-				"paths" => self::$paths,
-				"blockpath" => self::$blockpath,
 				"autoload" => self::$blockpath
 			); 
 		}
+		
+		/**
+		* Register blocks in a directory
+		*/
 		public static function BlocksAt($path) {
 		    $path = realpath($path);
 		    if (array_search($path,self::$blockpath) === false) {
