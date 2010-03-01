@@ -2,33 +2,36 @@
     /**
 	* Generates a URL to a resource in the application
 	*/
-	function url_to($action = NULL, $controller = NULL, $args = NULL) {
-	    $base = str_replace($_SERVER['QUERY_STRING'],'',$_SERVER['REQUEST_URI']);
-	    $base = array($base);
+	function url_to($action = NULL, $context = NULL, $args = NULL) {
+	    $router = new QueryString();
 	    
-	    if (is_null($controller)) {
-	        $xqs = explode("/",$_SERVER['QUERY_STRING']);
-	        $base[] = array_shift($xqs);
-	    }
-	    else
-	        $base[] = $controller;
+	    if (is_null($context)) {
+            $router = new QueryString();
+            $route = $router->Analyze($_SERVER['QUERY_STRING']);
+            $context = $route['context'];
+        }
+        if (empty($context))
+            $context = "Default";
 	    
-	    if (!is_null($action)) $base[] = $action;
-	    
-	    if (!is_null($args) && is_array($args)) {
-	        foreach ($args as $key => $value) {
-	            $base[] = "$key:$value";
-	        }
-	    }
-	    
-	    return str_replace("//","/",implode("/",$base));
+	    $route = array(
+	        'context' => $context,
+	        'action' => $action
+        );
+        if (is_array($args)) {
+            foreach ($args as $arg => $val) {
+                $route[$arg] = $val;
+            }
+        }
+        $qs = $router->Generate($route);
+        
+        return $qs;
 	}
 	
-	function link_to($text, $action = NULL, $controller = NULL, $args = NULL, $attribs = array()) {
+	function link_to($text, $action = NULL, $context = NULL, $args = NULL, $attribs = array()) {
 	    foreach ($attribs as $name => $value) {
 	        $attribs[$name] = "$name='" . $value . "'";
 	    }
-	    return "<a href='" . url_to($action,$controller,$args) . "' " . implode(" ",$attribs) . ">" . $text . "</a>";
+	    return "<a href='" . url_to($action,$context,$args) . "' " . implode(" ",$attribs) . ">" . $text . "</a>";
 	}
 	
 	/**
@@ -45,17 +48,10 @@
     * @param string $action The action to redirect to
     * @param array $args An array of additional arguments
     */
-    function redirect($action, $controller = NULL, $args = NULL) {
+    function redirect($action, $context = NULL, $args = NULL) {
         @ob_end_clean(); // stop output buffering and disregard any data
         
-        if (is_null($controller)) {
-            $arr = debug_backtrace();
-            $call = array_shift($arr);
-            $ctrller = array();
-            preg_match_all("/(\w+)Ctx/",$call['file'],$ctrller);
-            $controller = $ctrller[1][0];
-        }
-        $url = url_to($action, $controller, $args);
+        $url = url_to($action, $context, $args);
         header("Location: $url");
         echo "<meta http-equiv='refresh' content='2'>";
         echo "<script type='text/javascript'>location.href='$url';</script>";

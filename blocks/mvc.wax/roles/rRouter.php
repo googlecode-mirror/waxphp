@@ -38,10 +38,11 @@
         *
         * @param array $args The array of arguments to turn into a querystring
         */
-        static function Create(rRouter $self, $args) {
+        static function Generate(rRouter $self, $args) {
             $qsparts = array();
+            $aliases = $self->GetAliases();
             foreach ($args as $name => $value) {
-                if (isset($this->urlparts[$name])) {
+                if (array_search($name,$aliases) !== false) {
                     $qsparts[] = $value;
                 }
                 else {
