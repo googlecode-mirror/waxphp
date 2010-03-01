@@ -1,21 +1,12 @@
 <?php
 	/**
-	*  Base class for WaxBlocks -- can be used to build plugins/libraries/etc.
-	*  This class performs all the required actions necessary to load and access
-	*  information from a block
+	* Base class for WaxBlocks -- can be used to build plugins/libraries/etc.
+	* This class performs all the required actions necessary to load and access
+	* information from a block
+	*
+	* @author Joe Chrzanowski
+	* @version 0.10
 	*/
-	
-	class ResourceNotFoundException extends WaxException {
-		function __construct($resource, $block) {
-			parent::__construct("$resource not found", "<pre>" . print_r($block->_resources['views'],true) . "</pre>");
-		}
-	}
-	class BlockNotFoundException extends WaxException {
-	    function __construct($path) {
-	        parent::__construct("WaxBlock not found: $path","");
-	    }
-	}
-	
 	class WaxBlock {
 		var $_resources = array(
 			'views' => array(),
@@ -137,5 +128,16 @@
 		    }
 		    else throw new ResourceNotFoundException($resourcetype,$this);
 		}
+	}
+	
+	class ResourceNotFoundException extends WaxException {
+		function __construct($resource, $block) {
+			parent::__construct("$resource not found", "<pre>" . print_r($block->_resources['views'],true) . "</pre>");
+		}
+	}
+	class BlockNotFoundException extends WaxException {
+	    function __construct($path) {
+	        parent::__construct("WaxBlock not found: $path","");
+	    }
 	}
 ?>

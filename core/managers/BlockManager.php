@@ -1,4 +1,11 @@
 <?php
+    /**
+    * The BlockManager is responsible for maintaining a list of all
+    * loaded blocks and providing a central cache of all loaded 
+    * 
+    * @author Joe Chrzanowski
+    * @version 0.10
+    */
 	class BlockManager {
 		/**
 		* A list of resources that have been loaded by various blocks
@@ -12,14 +19,19 @@
 		* 
 		* @param string $block The name of the block to load
 		* @return The block object
-		* @throws 
 		*/
         static function LoadBlock($block) {
         	self::GetBlock($block);
         }
         
-        // returns a block by name -- looks thru the blockpath
-        // to try and find the block
+        /**
+        * Gets a block by name --
+        * looks through the loaded block cache first, if it's
+        * not found, it looks for the block in the blockpaths
+        *
+        * @param string $block The name of the block to load
+        * @return WaxBlock
+        */
         static function GetBlock($block) {
         	if (isset(self::$_loaded_blocks[$block]))
         		return self::$_loaded_blocks[$block];
@@ -29,7 +41,16 @@
 	        }
         }
         
-        static function LoadBlockAt($path = NULL) {
+        /**
+        * Loads a block at a given directory.  If the 
+        * directory does not contain a block, an exception
+        * is thrown.
+        * 
+        * @param string $path The path of the block to load
+        * @return WaxBlock 
+        * @throws BlockNotFoundException
+        */
+        static function LoadBlockAt($path) {
         	if (is_null($path) || empty($path)) 
 				throw new BlockNotFoundException($path);
         	else {
@@ -39,12 +60,24 @@
         	}
         }
         
-        // used mostly for getting all resources needed for an application
-        // usually in a header or something of the sort
+        /**
+        * Get a list of loaded blocks
+        *
+        * @param bool $nameonly Whether to return the names of the blocks instead of the WaxBlocks
+        * @return mixed
+        */
         static function GetLoadedBlocks($nameonly = false) {
         	return ($nameonly ? array_keys(self::$_loaded_blocks) : self::$_loaded_blocks);
         }
-        // find out which block a file is located in -- doesn't always work
+       
+        /**
+        * Gets a block from from the calling context
+        * If the filename isn't passed, this method looks through
+        * the backtrace to determine the calling block contexts.
+        *
+        * @param string $filename A resource file located within some block
+        * @return WaxBlock
+        */
         static function GetBlockFromContext($filename = NULL) {
 			$classname = NULL;
 			
@@ -93,7 +126,13 @@
 			return NULL;
         }
         
-		// get all css or js from all loaded blocks -- for header printing mostly
+        /**
+        * Looks through loaded blocks for JavaScript and CSS resources,
+        * and returns the respective URLs for each one.
+        *
+        * @param string $ret_only Specify whether to retrieve only js or only css: 'js' or 'css'
+        * @return array;
+        */
 		static function GetDHTMLResources($ret_only = NULL) {
 			$ret = array('js' => array(), 'css' => array());
 			foreach (self::GetLoadedBlocks() as $name => $block) {
@@ -110,6 +149,12 @@
 				return $ret;
 		}
         
+        /**
+        * Look through the Config::autoload array and load the 
+        * specified blocks
+        * 
+        * @return void
+        */
 		static function Init() {
 			// autoload blocks
             foreach (WaxConf::$autoload as $block) {
@@ -117,9 +162,13 @@
             }
 		}
         
-        // Private functions
-		// the findBlock function is responsible for 
-		// searching the $blockpath variable for a given block
+        /**
+        * Look through the blockpath and try to find a 
+        * block with the specified name
+        *
+        * @param string $block The name of the block to find
+        * @return string
+        */
         private static function findBlock($block) {
         	foreach (WaxConf::$blockpath as $path) {
         	    $check = $path . "/" . $block . ".wax";

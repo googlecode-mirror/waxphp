@@ -4,17 +4,21 @@
     * to act as a surrogate to an array.  This allows custom Get/Set methods to be
     * defined as necessary.
     *
-    * For example, this class is used extensively within the DCIObject and WaxBlock classes:
-    * WaxBlock->views['something'] -- allows the variable WaxBlock->views to represent
-    * WaxBlock->_resources['views'] using __get()
-    *
     * @author Joe Chrzanowski
+    * @version 0.10
     */
 	class ArraySurrogate implements ArrayAccess, Iterator {
+	    /**
+	    * A reference to the actual array
+	    */
 		protected $_arrayref = NULL;
 		
-		private $iter_position = 0;
-		
+		/**
+		* Construct an ArraySurrogate
+		*
+		* @param array $parent The base array to use for this object
+		* @param bool $reference Whether it should store a reference to the array or a copy
+		*/
 		function __construct($parent = null, $reference = true) { 			
 			if (!is_null($parent) && $reference)
 				$this->_arrayref =& $parent; 
@@ -24,7 +28,6 @@
 				$this->_arrayref = array();
 		}
 		
-		// basic get and set methods
 		function Get($index) {
 		    if (array_key_exists($index,$this->_arrayref))
 			    return $this->_arrayref[$index];

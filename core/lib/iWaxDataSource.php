@@ -1,6 +1,14 @@
 <?php
-    // iWaxDataSource defines the input/output methods that
-    // an object requires to act as a datasource for wax
+    /**
+    * The iWaxDataSource interface defines the input/output 
+    * methods that an object requires to act as a datasource for wax
+    *
+    * This interface can be extended by a role to create business
+    * logic that depends on the iWaxDataSource library
+    *
+    * @author Joe Chrzanowski
+    * @version 0.10
+    */
     interface iWaxDataSource {
         function CreateType($name, $attributes);
         function ExamineType($name);

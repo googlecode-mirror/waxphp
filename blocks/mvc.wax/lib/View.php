@@ -1,4 +1,12 @@
 <?php
+    /**
+    * This class is repsonsible for holding information
+    * for a View.  The class implements rRenderable to actually
+    * display the view.
+    * 
+    * @author Joe Chrzanowski
+    * @version 0.10
+    */
     class View extends DCIObject implements rRenderable {
         function __construct($block, $viewname) {
             parent::__construct();

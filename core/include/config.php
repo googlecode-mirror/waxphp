@@ -60,7 +60,7 @@
 		public static function Info() { 
 			return array(
 				"version" => self::$version,
-				"autoload" => self::$blockpath
+				"autoload" => self::$autoload
 			); 
 		}
 		
