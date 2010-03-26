@@ -22,9 +22,11 @@
                 $route[$arg] = $val;
             }
         }
+        
+        $base = str_replace($_SERVER['QUERY_STRING'],'',$_SERVER['REQUEST_URI']);
         $qs = $router->Generate($route);
         
-        return $qs;
+        return $base . $qs;
 	}
 	
 	function link_to($text, $action = NULL, $context = NULL, $args = NULL, $attribs = array()) {

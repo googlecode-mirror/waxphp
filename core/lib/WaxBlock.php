@@ -31,7 +31,7 @@
 		
 		private function loadResources($dir, $include_files = false) {
 			$dhtml = array("js","css","images");                                // creates web-relative path refs
-			$php = array("blocks","roles","views","include","lib","contexts");  // creates fs-absolute path refs
+			$php = array("blocks","include","roles","views","lib","contexts");  // creates fs-absolute path refs
 			
 			// resource loading loop--
 			// determines all javascript, css, and image resources
