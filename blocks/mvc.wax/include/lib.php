@@ -59,4 +59,10 @@
         echo "<script type='text/javascript'>location.href='$url';</script>";
         die();
     }
+    
+    function render_view(WaxBlock $block, $viewname, $args = array()) {
+        $view = new View($block, $viewname);
+        $vrctx = new ViewRenderCtx();
+        return $vrctx->Execute($view, $args);
+    }
 ?>

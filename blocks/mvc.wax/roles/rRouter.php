@@ -14,6 +14,8 @@
             $aliases = $self->GetAliases();
 			$url_parts = explode("/",$querystring);
 			
+			unset($_GET[$querystring]);
+			
 			// parse the URL parts into named parameters
     		foreach ($url_parts as $index => $piece) {
 			    $expanded = explode(":",$piece);
@@ -27,6 +29,8 @@
 				}
 
 				$route[$index] = $piece;
+				$_GET[$index] = $piece;
+				$_REQUEST[$index] = $piece;
 			}
 			return $route;
         }

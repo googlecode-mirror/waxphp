@@ -10,7 +10,7 @@
     * @version 0.10
     */
     class WebAppCtx extends Context {
-        function Execute($layout_override = NULL, $target_override = NULL, $action_override = NULL) {
+        function Execute($layout_override = NULL, $target_override = NULL, $action_override = NULL, $view_override = NULL) {
             $block = BlockManager::LoadBlockAt(getcwd());
             
             $router = new QueryString();
@@ -33,16 +33,23 @@
             }
             
             $context = $context_name . "Ctx";
-            if (class_exists($context))
+            if (class_exists($context)) {
                 $ctrl = new $context();
+                if (!($ctrl instanceof ControllerCtx))
+                    throw new InvalidContextException($context);
+            }
             else
                 throw new TargetContextNotFoundException($context);
                 
             
+            
             $data_for_view = $ctrl->Execute($action, $route);
             
             $view_ctx = new ViewRenderCtx();
-            $content_for_layout = $view_ctx->Execute(new View($block,"$context_name/$action"), $data_for_view);
+            $viewname = "$context_name/$action";
+            if (!is_null($view_override))
+                $viewname = $view_override;
+            $content_for_layout = $view_ctx->Execute(new View($block,$viewname), $data_for_view);
 
             $layoutctx = new LayoutRenderCtx();
             $layout = "layout";

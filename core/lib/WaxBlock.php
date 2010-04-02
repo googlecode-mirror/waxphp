@@ -29,6 +29,23 @@
 			$this->loadResources($blockpath, $include_files);
 		}
 		
+		private function analyzeViewDir($dir, $viewprefix = '') {
+		    foreach (scandir($dir) as $view) {
+                if ($view[0] == '.' || $view[0] == '_') continue;
+                
+                if (is_dir("$dir/$view")) {
+                    $append_vpfx = explode("/","$dir/$view");
+                    $append_vpfx = array_pop($append_vpfx);
+                    $new_viewprefix = ($viewprefix ? $viewprefix : "") . $append_vpfx . "/";
+                    $this->analyzeViewDir("$dir/$view", $new_viewprefix);
+                }
+                else {
+                    $viewtitle = explode(".",$view);
+                    $this->_resources["views"][$viewprefix . array_shift($viewtitle)] = "$dir/$view";
+                }
+            }
+		}
+		
 		private function loadResources($dir, $include_files = false) {
 			$dhtml = array("js","css","images");                                // creates web-relative path refs
 			$php = array("blocks","include","roles","views","lib","contexts");  // creates fs-absolute path refs
@@ -67,22 +84,7 @@
 			            break;
 			            
 			            case "views":
-                            foreach (scandir("$dir/$resourcedir") as $view) {
-                                if ($view[0] == '.' || $view[0] == '_') continue;
-                                
-                                if (is_dir("$dir/$resourcedir/$view")) {
-                                    foreach (scandir("$dir/$resourcedir/$view") as $subview) {
-                                        if ($subview[0] == '.' || $subview[0] == '_') continue;
-                                        
-                                        $viewtitle = explode(".",$subview);
-                                        $this->_resources["views"]["$view/" . array_shift($viewtitle)] = "$dir/$resourcedir/$view/$subview";
-                                    }
-                                }
-                                else {
-                                    $viewtitle = explode(".",$view);
-                                    $this->_resources["views"][array_shift($viewtitle)] = "$dir/$resourcedir/$view";
-                                }
-                            }
+                            $this->analyzeViewDir("$dir/$resourcedir");
                         break;
                         
                         // the idea behind the blocks and roles directories
