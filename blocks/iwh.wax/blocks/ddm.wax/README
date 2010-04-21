@@ -1,0 +1,12 @@
+DDM: Dynamic Data Model
+
+Allows the Wax PHP framework to use a dynamic data model, stored in a 
+database and completely changeable from code.
+
+Pros:
+Modifiable data model - easy to modify running system
+
+Cons:
+Speed - database is contained in a database
+Code management still required:
+	Application level features need to be coded in manually

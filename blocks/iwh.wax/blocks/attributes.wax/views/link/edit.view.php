@@ -1,0 +1,1 @@
+<input type='text' name='record[<?php echo $name; ?>]' value='<?=($value ? $value : ""); ?>' />

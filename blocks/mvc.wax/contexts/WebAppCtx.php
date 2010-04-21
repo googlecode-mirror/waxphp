@@ -10,7 +10,7 @@
     * @version 0.10
     */
     class WebAppCtx extends Context {
-        function Execute($layout_override = NULL, $target_override = NULL, $action_override = NULL, $view_override = NULL) {
+        function Execute($layout_override = NULL, $target_override = NULL, $action_override = NULL, $view_override = NULL, $block_override = NULL) {
             $block = BlockManager::LoadBlockAt(getcwd());
             
             $router = new QueryString();
