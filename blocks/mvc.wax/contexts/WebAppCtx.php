@@ -7,11 +7,19 @@
     * rendering the view, and rendering the layout.
     *
     * @author Joe Chrzanowski
-    * @version 0.10
+    * @version 0.11
     */
     class WebAppCtx extends Context {
         function Execute($layout_override = NULL, $target_override = NULL, $action_override = NULL, $view_override = NULL, $block_override = NULL) {
+            
+            // try the application block first
             $block = BlockManager::LoadBlockAt(getcwd());
+            $appblock = $block;
+            
+            if (!is_null($block_override) && $block_override instanceof WaxBlock) {
+                // designate a different block as the holder of the necessary files
+                $block = $block_override;
+            }
             
             $router = new QueryString();
             $route = $router->Analyze($_SERVER['QUERY_STRING']);
@@ -33,15 +41,17 @@
             }
             
             $context = $context_name . "Ctx";
-            if (class_exists($context)) {
+            // verify that the controllercontext is in the same block as the views
+            if (!file_exists($block->GetBaseDir() . "/contexts/" . $context . ".php")) {
+                throw new TargetContextNotFoundException($context);
+            }
+            else if (class_exists($context)) {
                 $ctrl = new $context();
                 if (!($ctrl instanceof ControllerCtx))
                     throw new InvalidContextException($context);
             }
             else
-                throw new TargetContextNotFoundException($context);
-                
-            
+                throw new TargetContextNotFoundException($context);            
             
             $data_for_view = $ctrl->Execute($action, $route);
             
@@ -55,7 +65,13 @@
             $layout = "layout";
             if (!is_null($layout_override))
                 $layout = $layout_override;
-            return $layoutctx->Execute(new View($block,"layout"), $content_for_layout);
+            
+            try {
+                return $layoutctx->Execute(new View($block,$layout), $content_for_layout);
+            }
+            catch (ViewNotFoundException $vnfe) {
+                return $layoutctx->Execute(new View($appblock,$layout), $content_for_layout);
+            }
         }
     }
 ?>

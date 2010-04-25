@@ -120,6 +120,8 @@
 			}
 		}
 		
+		function GetBaseDir() { return $this->_blockdir; }
+		
 		function __call($func, $args) {
 			$arg = array_shift($args);
 			return $this->GetResource($func, $arg);

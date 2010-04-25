@@ -96,4 +96,15 @@
             parent::__construct("Context: $ctx Not Found","Could not execute $ctx in Context Group: " . $grpname);
         }
     }
+    
+    class InvalidResourceException extends WaxException {
+        function __construct($obj, $method, $args) {
+            parent::__construct("Invalid Resource Action Specified","Resource " . get_class($obj) . "." . $obj->id . " does not contain '$method'");
+        }
+    }
+    class UnlinkableResourceException extends WaxException {
+        function __construct($obj, $method, $args) {
+            parent::__construct("Unlinkable Resource (Type = " . get_class($obj) . ")", "Only WaxObject resources can be linked by URL.");
+        }
+    }
 ?>
