@@ -1,0 +1,1 @@
+<textarea name='record[<?=$name?>]'><?=(!empty($value) ? $value : "");?></textarea>
