@@ -50,7 +50,7 @@
 		* blocks to autoload
 		*/
         public static $autoload = array(
-        	"mvc",		// base libraries for web development
+        	"web",		// base libraries for web development
         	"database"
         );
 		
