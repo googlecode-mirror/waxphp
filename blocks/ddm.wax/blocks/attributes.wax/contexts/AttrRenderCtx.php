@@ -5,15 +5,19 @@
     class AttrRenderCtx extends Context {
         function Execute(array $attr, $action, $value = "") {
             $attr['value'] = $value;
-            $attr = new Attribute($attr);
-            // look for a context matching this attribute:
+            
+            $classname = $attr['type'] . "Attribute";
+            if (class_exists($classname))
+                $attr = new $classname($attr);
+            else 
+                throw new AttributeTypeNotFoundException($classname, $action);
+                
             $xtra_args = array();
-            $attr_name = $attr->GetType();
-            $attrctxname = "${attr_name}AttrCtx";
-            if (class_exists($attrctxname)) {
-                $attrctx = new $attrctxname();
-                $xtra_args = $attrctx->Execute($attr, $action);
+            try {
+                $xtra_args = $attr->$action();
             }
+            catch (RoleMethodNotFoundException $rmnfe) {}
+            
             return $attr->Render($action,$xtra_args);
         }
     }

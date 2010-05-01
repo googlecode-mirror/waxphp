@@ -4,8 +4,7 @@
 <h3>Rename Attributes</h3>
 <br />
 <form method='post' action='<?=url_to('modify_rename')?>'>
-<div id='attr_holde
-r'>
+<div id='attr_holder'>
     <?php foreach ($model as $attr => $details): ?>
     <ul class='attr_list
     ' id='attr_<?=$details['id']?>'>

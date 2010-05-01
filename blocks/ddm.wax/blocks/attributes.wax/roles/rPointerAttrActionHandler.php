@@ -1,32 +1,42 @@
 <?php
-    class PointerAttrCtx extends AttrCtx {
-        function view() {
+    interface rPointerAttrActionHandler {
+        
+    }
+    
+    class rPointerAttrActionHandlerActions {
+        static function view(rPointerAttrActionHandler $self) {
             $ddm = DSM::Get();
-            $options = $this->attribute->GetOptions();
-            $record = $ddm->FindByID($options['type'], $this->attribute->GetValue());
+            $options = $self->GetOptions();
             
-            $this->view['link_label'] = $record[$options['label']];
+            $record = $ddm->FindByID($options['type'], $self->GetValue());
+            
+            return array('link_label' => $record[$options['label']]);
         }
-        function edit() {
+        static function edit(rPointerAttrActionHandler $self) {
             $ddm = DSM::Get();
             
-            $opts = $this->attribute->GetOptions();
+            $opts = $self->GetOptions();
+            $ret = array();
+            
             if (isset($opts['type'])) {
                 $records = $ddm->Find($opts['type']);
                 $rfv = array();
                 foreach ($records as $r) {
                     $rfv[$r['_id']] = $r[$opts['label']];
                 }
-                $this->view['records'] = $rfv;
+                $ret['records'] = $rfv;
             }
-            else $this->view['records'] = array();
+            else $ret['records'] = array();
+            
+            return $ret;
         }
-        function editor() {
+        static function editor(rPointerAttrActionHandler $self) {
             $ddm = DSM::Get();
             $types = $ddm->ListTypes();
             $this->view['types'] = $types;
             
-            $options = $this->attribute->GetOptions();
+            $options = $self->GetOptions();
+            
             $descs = array();
             if (!isset($options['type'])) {
                 foreach ($types as $tid => $type) {
@@ -37,7 +47,7 @@
             else
                 $descs = array($options['type'] => $ddm->ExamineType($options['type']));
                 
-            $this->view['typeattrs'] = $descs;
+            return array('typeattrs' => $descs);
         }
     }
 ?>

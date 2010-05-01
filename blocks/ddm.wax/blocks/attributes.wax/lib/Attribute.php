@@ -1,5 +1,5 @@
 <?php
-    class Attribute extends DCIObject implements rRenderableAttribute {
+    class Attribute extends WaxObject implements rRenderableAttribute {
         private $_id;
         private $_name;
         private $_type;
@@ -20,12 +20,12 @@
             $this->_options = (isset($attr_data['options']) ? $attr_data['options'] : array());
         }
         
-        function GetID() { return $this->_id; }
-        function GetName() { return $this->_name; }
-        function GetType() { return $this->_type; }
-        function GetDefault() { return $this->_default; }
-        function GetValue() { return $this->_value; }
-        function GetLabel() { return $this->_label; }
-        function GetOptions() { return $this->_options; }
+        function GetID()        { return $this->_id; }
+        function GetName()      { return $this->_name; }
+        function GetType()      { return $this->_type; }
+        function GetDefault()   { return $this->_default; }
+        function GetValue()     { return $this->_value; }
+        function GetLabel()     { return $this->_label; }
+        function GetOptions()   { return $this->_options; }
     }
 ?>

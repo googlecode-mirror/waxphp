@@ -2,38 +2,34 @@
     /**
 	* Generates a URL to a resource in the application
 	*/
-	function url_to($action = NULL, $context = NULL, $args = NULL) {
-	    $router = new QueryString();
+	function url_to($method = "index", $obj = NULL, $args = array()) {
+	    if (is_object($obj))
+	        $obj = get_class($obj);
+	    else if (is_null($obj)) {
+	        $parts = explode("/",$_SERVER['QUERY_STRING']);
+	        if (isset($parts[0]))
+    	        $obj = $parts[0];
+	    }
+	    if (empty($obj))
+	        $obj = "Home";
+	        
+	    $url = array($obj);
+	    if (isset($args['id'])) {
+	        $url[] = $args['id'];
+	        unset($args['id']);
+	    }
+	    $url[] = $method;
+	    $url = array_merge($url,$args);
+	    	    
+	    $requri = preg_replace("/\/+/","/",$_SERVER['REQUEST_URI']);
+	    $base = str_replace($_SERVER['QUERY_STRING'],'',$requri);
+	    $base .= implode("/", $url);
 	    
-	    if (is_null($context)) {
-            $router = new QueryString();
-            $route = $router->Analyze($_SERVER['QUERY_STRING']);
-            $context = $route['context'];
-        }
-        if (empty($context))
-            $context = "Default";
-	    
-	    $route = array(
-	        'context' => $context,
-	        'action' => $action
-        );
-        if (is_array($args)) {
-            foreach ($args as $arg => $val) {
-                $route[$arg] = $val;
-            }
-        }
-        
-        $base = str_replace($_SERVER['QUERY_STRING'],'',$_SERVER['REQUEST_URI']);
-        $qs = $router->Generate($route);
-        
-        return $base . $qs;
+	    return $base;
 	}
 	
-	function link_to($text, $action = NULL, $context = NULL, $args = NULL, $attribs = array()) {
-	    foreach ($attribs as $name => $value) {
-	        $attribs[$name] = "$name='" . $value . "'";
-	    }
-	    return "<a href='" . url_to($action,$context,$args) . "' " . implode(" ",$attribs) . ">" . $text . "</a>";
+	function link_to($text, $method = NULL, $object = NULL, $args = array(), $attribs = array()) {
+	    return "<a href='" . url_to($method, $object, $args) . "'>$text</a>";
 	}
 	
 	/**

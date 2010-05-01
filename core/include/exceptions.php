@@ -104,7 +104,13 @@
     }
     class UnlinkableResourceException extends WaxException {
         function __construct($obj, $method, $args) {
-            parent::__construct("Unlinkable Resource (Type = " . get_class($obj) . ")", "Only WaxObject resources can be linked by URL.");
+            parent::__construct("Unlinkable Resource (Type = " . (is_object($obj) ? get_class($obj) : $obj) . ")", "Only WaxObject resources can be linked by URL.");
+        }
+    }
+    
+    class AttributeNotFoundException extends WaxException {
+        function __construct($attr, $obj) {
+            parent::__construct("Attribute Not Found: $attr","$attr not found in " . get_class($obj) . "<pre>" . print_r($obj,true) . "</pre>");
         }
     }
 ?>

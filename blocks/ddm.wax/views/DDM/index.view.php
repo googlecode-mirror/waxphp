@@ -36,4 +36,4 @@
 <br />
 <?=link_to("Create New Record","create");?> | 
 <?=link_to("Alter Data Model","modify");?> | 
-<?=link_to("Main Page","index","Default");?>
+<?=link_to("Main Page","index","Home");?>

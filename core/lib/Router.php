@@ -4,7 +4,7 @@
             parent::__construct("$objname::$target not found","Could not execute $objname::$target()");
         }
     }
-    class InvalidTargetExecption extends WaxException {
+    class InvalidTargetException extends WaxException {
         function __construct($objname) {
             parent::__construct("Invalid Target: $objname","$objname must be instance of WaxObject");
         }
@@ -17,24 +17,24 @@
 
     interface rObjectRouter {
     }
+    
     class rObjectRouterActions {
-        static function ExecuteTarget(rObjectRouter $self) {
+        static function ExecuteTarget(rObjectRouter $self, $objargs = array()) {
             $objname = $self->GetObjectName();
             if (class_exists($objname)) {
                 $obj = new $objname();
+                if (method_exists($obj, 'initialize'))
+                    call_user_func_array(array($obj, "initialize"), $objargs);
+                
                 if ($obj instanceof WaxObject) {
                     // good
                     $obj->id = $self->GetObjectID();
-                    try {
-                        $method = $self->GetMethod();
-                        $args = $self->GetArgs();
-                        $args[] = $_POST;
-                        
-                        return call_user_func_array(array($obj,$method),$args);
-                    }
-                    catch (WaxException $we) {
-                        throw new ObjectTargetNotFoundException($objname, $self->GetMethod());
-                    }
+
+                    $method = $self->GetMethod();
+                    $args = $self->GetArgs();
+                    $args[] = $_POST;
+                
+                    return call_user_func_array(array($obj,$method),$args);
                 }
                 else {
                     // bad
@@ -45,13 +45,20 @@
                 throw new ObjectNotFoundException($objname, "", array());
             }
         }
+        static function DetermineViewname(rObjectRouter $self) {
+            $viewname = $self->GetObjectName();
+            $viewtarget = $self->GetMethod();
+            
+            $viewname = "$viewname/$viewtarget";
+            return $viewname;
+        }
     }
     
     
     class Router extends DCIObject implements rObjectRouter {
         var $aliases = array(
                         "objectname"    => "Home",
-                        "objectid"      => "",
+                        "objectid"      => '',
                         "method"        => "index",
                     );
         var $data = array('args' => array());
@@ -65,6 +72,10 @@
             $indx = 0;
             $aliases = array_keys($this->aliases);
             foreach ($parts as $part) {
+                if ($aliases[$indx] == "objectid" && !is_numeric($part)) {
+                    $indx++;
+                }
+                    
                 if (isset($aliases[$indx])) {
                     $this->data[$aliases[$indx++]] = $part;
                 }
@@ -83,8 +94,9 @@
                 else if (isset($this->aliases[$var]))
                     return $this->aliases[$var];
             }
-            else
+            else {
                 return parent::__call($func,$args);
+            }
         }
     }
 ?>

@@ -68,13 +68,16 @@
 	* Translates a resource into a resource address for use in Wax apps
 	*/
 	function _resourceid($object, $method = NULL, array $args = array()) {
+	    if (is_string($object)) {
+	        $object = new $object();
+	    }
 	    if ($object instanceof WaxObject) {
 	        $objname = get_class($object);
 	        $objid = $object->id;
 	        
 	        $url = array($objname, $objid);
-	        if (!is_null($action_resource)) {
-	            if (!isset($object->methods[$action_resource]))
+	        if (!is_null($method)) {
+	            if (!isset($object->methods[$method]))
 	                throw new InvalidResourceException($object, $method, $args);
 	            else
 	                $url[] = $method;

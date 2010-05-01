@@ -1,17 +1,12 @@
 <?php
     interface rRenderableAttribute {
-        function GetID();
-        function GetName();
-        function GetType();
-        function GetDefault();
-        function GetLabel();
-        function GetValue();
-        function GetOptions();
     }
     
     class rRenderableAttributeActions {
         static function Render(rRenderableAttribute $self, $action, array $xtra_args) {
             
+            // model getters are dynamic.
+            // an attributenotfoundexception is thrown if one of these isn't found
             $type = $self->GetType();
             $args = array(
                 "id" => $self->GetID(),

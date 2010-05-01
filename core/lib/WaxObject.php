@@ -17,6 +17,28 @@
     * a REST url.
     */
     class WaxObject extends DCIObject {
-        var $id;
+        var     $id;   
+        private $attrs;
+        
+        function __construct($data = array()) {
+            parent::__construct();
+            $this->attrs = $data;
+        }
+        function __get($var) {
+            if (isset($this->attrs[$var]))
+                return $this->attrs[$var];
+            else
+                throw new AttributeNotFoundException($var,$this);
+        }
+        function __call($func,$args) {
+            if (preg_match("/^Get/",$func)) {
+                $func = substr($var,3);
+                return $this->__get($func);
+            }
+            else 
+                return parent::__call($func,$args);
+        }
+        
+        function GetType() { return get_class($this); }
     }
 ?>

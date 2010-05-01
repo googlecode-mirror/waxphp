@@ -269,14 +269,20 @@
             $q = "SELECT *, records.id as record_id FROM records " . 
                 "JOIN models ON records.model_id = models.id " . 
                 "WHERE models.name LIKE :name";
-            if (isset($filters['_id']))
+                
+            // _id is a special case
+            if (isset($filters['_id'])) {
                 $q .= " AND records.id=:id";
+            }
             
             $q .= ";";
+            
             $stmt = $this->prepare($q);
             $stmt->bindValue("name",$type);
-            if (isset($filters['_id'])) 
+            if (isset($filters['_id'])) {
                 $stmt->bindValue("id",$filters['_id']);
+                unset($filters['_id']);
+            }
             $stmt->execute();
             $errchk = $stmt->errorInfo();
             if ($errchk[0] != '00000') {
@@ -284,30 +290,32 @@
             }
             $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
+            // fetch the data for each attribute
             $dq = "SELECT *, model_structure.name AS attr_name FROM record_data " . 
                 "JOIN model_structure ON record_data.structure_id = model_structure.id " . 
                 "WHERE record_id = :record_id";
-                
+               
+            
+            $qargs = array(); 
             foreach ($filters as $column => $value) {
-                $dq .= " AND (`attr_name`=:${column}_name AND `data` LIKE :${column}_value)";
+                $dq .= " AND (`model_structure`.`name`=:${column}_name AND `data` LIKE :${column}_value)";
+                $qargs[$column . "_name"] = $column;
+                $qargs[$column . "_value"] = $value;
             }
             $dq .= ";";
                 
+            
             $dstmt = $this->prepare($dq);
             $errchk = $this->errorInfo();
             if ($errchk[0] != '00000') {
                 throw new WaxPDOException($errchk);
             }
             
-            foreach ($filters as $column => $value) {
-                $dstmt->bindValue($column . "_name",$column);
-                $dstmt->bindValue($column . "_value",$value);
-            }
-            
             $ret = array();
             
             foreach ($records as $record_header) {
-                $dstmt->execute(array("record_id" => $record_header['record_id']));
+                $qargs['record_id'] = $record_header['record_id'];
+                $dstmt->execute($qargs);
                 $errchk = $dstmt->errorInfo();
                 if ($errchk[0] != '00000') {
                     throw new WaxPDOException($errchk);

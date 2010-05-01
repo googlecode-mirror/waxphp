@@ -13,6 +13,7 @@
     <select name='model[<?=$attr['id']?>][type]'>
         <?php foreach ($types as $type): ?>
             <?php if ($type[0] == '.') continue; ?>
+            
             <option value="<?=$type?>" <?=($type == $attr['type'] ? "selected" : "")?>><?=$type?></option>
         <?php endforeach; ?>
     </select>
