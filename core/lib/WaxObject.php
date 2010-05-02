@@ -32,7 +32,7 @@
         }
         function __call($func,$args) {
             if (preg_match("/^Get/",$func)) {
-                $func = substr($var,3);
+                $func = substr($func,3);
                 return $this->__get($func);
             }
             else 

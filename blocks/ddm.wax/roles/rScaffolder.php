@@ -55,6 +55,18 @@
         }
         static function save(rScaffolder $self) {
             $ddm = DSM::Get();
+            
+            $attrs = $ddm->ExamineType($self->GetType(),true);
+            foreach ($attrs as $attr => $details) {
+                if (isset($_POST['record'][$attr])) {   
+                    $attrctx = new AttrSaveCtx();
+                    $result = $attrctx->Execute($details, $_POST['record']);
+                    if ($result) {
+                        $_POST['record'] = $result;
+                    }
+                }
+            }
+            
             $ddm->Save($self->GetType(), $_POST['record']);
             redirect("index");
         }
@@ -73,8 +85,9 @@
         }
         static function delete(rScaffolder $self) {
             $ddm = DSM::Get();
-            $did = $_GET['delete'];
-            $ddm->AlterType($self->GetType(),NULL,array($did));
+            $did = $self->id;
+            
+            $ddm->Delete($self->GetType(),$did);
             redirect("index");
         }
     }

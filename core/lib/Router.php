@@ -28,13 +28,34 @@
                 
                 if ($obj instanceof WaxObject) {
                     // good
-                    $obj->id = $self->GetObjectID();
+                    if (class_exists($obj->GetType() . $self->GetMethod() . "Ctx")) {
+                        $ctxname = $obj->GetType() . $self->GetMethod() . "Ctx";
+                        $ob_ctx = new $ctxname();
+                        
+                        $objtype = $obj->GetType();
+                        $obj = new $objtype();
+                        $obj->id = $self->GetObjectID();
+                        
+                        $args = $self->GetArgs();
+                        if (!$args) 
+                            $args = array();
+                        array_unshift($args, $obj);
+                        
+                        if ($ob_ctx instanceof Context)
+                            return call_user_func_array(array($ob_ctx, "Execute"), $args);
+                        else
+                            throw new InvalidContextException($ctxname);
+                    }
+                    else {
+                        $obj->id = $self->GetObjectID();
 
-                    $method = $self->GetMethod();
-                    $args = $self->GetArgs();
-                    $args[] = $_POST;
+                        $method = $self->GetMethod();
+                        $args = $self->GetArgs();
+                        if (!$args)
+                            $args = array();
                 
-                    return call_user_func_array(array($obj,$method),$args);
+                        return call_user_func_array(array($obj,$method),$args);
+                    }
                 }
                 else {
                     // bad
@@ -72,11 +93,11 @@
             $indx = 0;
             $aliases = array_keys($this->aliases);
             foreach ($parts as $part) {
-                if ($aliases[$indx] == "objectid" && !is_numeric($part)) {
-                    $indx++;
-                }
-                    
                 if (isset($aliases[$indx])) {
+                    if ($aliases[$indx] == "objectid" && !is_numeric($part)) {
+                        $indx++;
+                    }
+                    
                     $this->data[$aliases[$indx++]] = $part;
                 }
                 else {

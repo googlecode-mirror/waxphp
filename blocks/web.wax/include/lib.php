@@ -2,7 +2,7 @@
     /**
 	* Generates a URL to a resource in the application
 	*/
-	function url_to($method = "index", $obj = NULL, $args = array()) {
+	function url_to($method = "index", $obj = NULL, array $args = array()) {
 	    if (is_object($obj))
 	        $obj = get_class($obj);
 	    else if (is_null($obj)) {
@@ -12,17 +12,18 @@
 	    }
 	    if (empty($obj))
 	        $obj = "Home";
-	        
+	        	        
 	    $url = array($obj);
 	    if (isset($args['id'])) {
 	        $url[] = $args['id'];
 	        unset($args['id']);
 	    }
+	    
 	    $url[] = $method;
 	    $url = array_merge($url,$args);
-	    	    
-	    $requri = preg_replace("/\/+/","/",$_SERVER['REQUEST_URI']);
-	    $base = str_replace($_SERVER['QUERY_STRING'],'',$requri);
+	    
+	    $base = urldecode($_SERVER['REQUEST_URI']);
+	    $base = str_replace($_SERVER['QUERY_STRING'],'',preg_replace("/\/+/","/",$base));
 	    $base .= implode("/", $url);
 	    
 	    return $base;
@@ -46,10 +47,10 @@
     * @param string $action The action to redirect to
     * @param array $args An array of additional arguments
     */
-    function redirect($action, $context = NULL, $args = NULL) {
+    function redirect($method, $obj = NULL, $args = array()) {
         @ob_end_clean(); // stop output buffering and disregard any data
         
-        $url = url_to($action, $context, $args);
+        $url = url_to($method, $obj, $args);
         header("Location: $url");
         echo "<meta http-equiv='refresh' content='2'>";
         echo "<script type='text/javascript'>location.href='$url';</script>";

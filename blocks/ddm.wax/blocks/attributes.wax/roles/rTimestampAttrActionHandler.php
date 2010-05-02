@@ -1,7 +1,7 @@
 <?php
     interface rTimestampAttrActionHandler {}
     
-    class rTimestampAttrHandlerActions {
+    class rTimestampAttrActionHandlerActions {
         static function editor(rTimestampAttrActionHandler $self) {
             $formats = array(
                 "F d, Y g:i A",

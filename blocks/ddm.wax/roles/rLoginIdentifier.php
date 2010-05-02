@@ -1,33 +1,38 @@
 <?php
     interface rLoginIdentifier {
     }
+    
+    class InvalidCredentialsException extends WaxException {
+        function __construct($uname) {
+            parent::__construct("Invalid Username/Password","Your username and/or password was incorrect.");
+        }
+    }
     class rLoginIdentifierActions {
-        static function Authenticate(rLoginIdentifier $self, $password, $hash_func = NULL, $pwd_salt = NULL) {
+        static function Authenticate(rLoginIdentifier $self, $password) {
             $ddm = DSM::Get();  // get the data source
             
-            // WARNING: PHP 5.3 (anonymous functions)
-            if ($hash_func == NULL) {
-                $hash_func = function ($password, $salt) {
-                    return md5($password . $salt);
-                };
-            }
+            $objstruct = $ddm->ExamineType(get_class($self),true);
+            $objstruct['Password']['value'] = $password;
+            $pw = new PasswordAttribute($objstruct['Password']);
+                        
             $user = $ddm->Find(get_class($self),array(
-                        "username" => $self->GetUsername(),                 // look for this username
-                        "password" => $hash_method($password, $pwd_salt))   // hash the password
-                    );
+                        "Username" => $self->GetUsername(),                 // look for this username
+                        "Password" => $pw->Hash()   // hash the password
+                    ));
                     
+
             if ($user)
-                return $user['_id'];
+                return $user;
             else
-                return false;
+                throw new InvalidCredentialsException($self->GetUsername());
         }
-        static function SetSession($var, $value) {
+        static function SetSession(rLoginIdentifier $self, $var, $value) {
             @session_start();
             
             $_SESSION[$var] = $value;
             return;
         }
-        static function DestroySession() {
+        static function DestroySession(rLoginIdentifier $self) {
             // unset all vars and generate a new id
             foreach ($_SESSION as $var => $value) {
                 unset($_SESSION[$var]);

@@ -48,6 +48,8 @@
                 $alter = array();
                 $options = array();
                 foreach ($_POST['model'] as $attr => $details) {
+                    $options = array();
+                    
                     if (isset($details['options'])) {
                         $options = $details['options'];
                         unset($details['options']);
@@ -55,13 +57,12 @@
                     $ddm->AlterAttribute($attr, $details, $options);
                 }
             }
-            redirect("modify");
+            redirect("modify", $self->GetType());
         }
-        static function modify_remove(rDynamicModelHandler $self) {
-            $ddm = DSM::Get();
-            if (isset($this->get['delete'])) {
-                $ddm->AlterType($self->GetType(), NULL, array($this->get['delete']));
-            }
+        static function modify_remove(rDynamicModelHandler $self, $attr2remove) {
+            $ddm = DSM::Get();            
+            $ddm->AlterType($self->GetType(), NULL, array($attr2remove));
+            
             redirect("modify");
         }
     }

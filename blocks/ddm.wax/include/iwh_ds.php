@@ -27,7 +27,7 @@
             return parent::prepare($query);
         }
         // creates a model with the given structure
-        function CreateType($name, $attributes, $attr_default = NULL) {
+        function CreateType($name, $attributes = array(), $attr_default = NULL) {
             // insert a record into models
             $this->beginTransaction();
             
@@ -108,6 +108,12 @@
             
             $q = "UPDATE model_structure SET `name`=:name, `type`=:type, `default`=:default, `label`=:label WHERE `id` = :id";
             $stmt = $this->prepare($q);
+            $errchk = $this->errorInfo();
+            if ($errchk[0] != '00000') {
+                $this->rollBack();
+                throw new WaxPDOException($errchk);
+            }
+            
             $stmt->bindValue("id",$struct);
             _debug($attr_data);
             foreach ($attr_data as $col => $val) {
@@ -266,23 +272,55 @@
                 	WHERE (model_structure.name = 'Description' AND record_data.data LIKE '%black%')
                 );
             ***/
-            $q = "SELECT *, records.id as record_id FROM records " . 
-                "JOIN models ON records.model_id = models.id " . 
-                "WHERE models.name LIKE :name";
+            $q = <<<QUERY
+SELECT * FROM record_data
+JOIN model_structure ON model_structure.id = record_data.structure_id
+QUERY;
                 
-            // _id is a special case
+            // _id is a special case --> find this record
             if (isset($filters['_id'])) {
-                $q .= " AND records.id=:id";
+                $q .= " WHERE record_data.record_id=:id";
             }
-            
+            else {
+                $qconds = array();
+                foreach ($filters as $column => $value) {
+                    $qconds[] = "record_data.record_id IN (\n" . 
+                                "SELECT record_data.record_id FROM record_data \n" . 
+                                "JOIN model_structure ON model_structure.id = record_data.structure_id \n" . 
+                                "WHERE (`model_structure`.`name`=:${column}_name AND `data` LIKE :${column}_value)\n" . 
+                                ")";
+                    $qargs[$column . "_name"] = $column;
+                    $qargs[$column . "_value"] = $value;
+                }
+                if (count($qconds) > 0) {
+                    $q .= " WHERE ";
+                    $q .= implode(" AND ",$qconds);
+                }
+            }
             $q .= ";";
             
             $stmt = $this->prepare($q);
-            $stmt->bindValue("name",$type);
             if (isset($filters['_id'])) {
                 $stmt->bindValue("id",$filters['_id']);
-                unset($filters['_id']);
             }
+            else {
+                foreach ($filters as $column => $value) {
+                    $q = str_replace(
+                        array(
+                            ":${column}_name",
+                            ":${column}_value"
+                        ),
+                        array(
+                            "'" . $column . "'",
+                            "'" . $value . "'"
+                        ),
+                        $q
+                    );
+                    $stmt->bindValue($column . "_name",$column);
+                    $stmt->bindValue($column . "_value",$value);
+                }
+            }
+
             $stmt->execute();
             $errchk = $stmt->errorInfo();
             if ($errchk[0] != '00000') {
@@ -290,42 +328,14 @@
             }
             $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // fetch the data for each attribute
-            $dq = "SELECT *, model_structure.name AS attr_name FROM record_data " . 
-                "JOIN model_structure ON record_data.structure_id = model_structure.id " . 
-                "WHERE record_id = :record_id";
-               
-            
-            $qargs = array(); 
-            foreach ($filters as $column => $value) {
-                $dq .= " AND (`model_structure`.`name`=:${column}_name AND `data` LIKE :${column}_value)";
-                $qargs[$column . "_name"] = $column;
-                $qargs[$column . "_value"] = $value;
-            }
-            $dq .= ";";
-                
-            
-            $dstmt = $this->prepare($dq);
-            $errchk = $this->errorInfo();
-            if ($errchk[0] != '00000') {
-                throw new WaxPDOException($errchk);
-            }
-            
             $ret = array();
-            
-            foreach ($records as $record_header) {
-                $qargs['record_id'] = $record_header['record_id'];
-                $dstmt->execute($qargs);
-                $errchk = $dstmt->errorInfo();
-                if ($errchk[0] != '00000') {
-                    throw new WaxPDOException($errchk);
-                }
-                $ret[$record_header['record_id']] = array("_id" => $record_header['record_id']);
-                foreach ($dstmt->fetchAll(PDO::FETCH_ASSOC) as $attr) {
-                    $ret[$record_header['record_id']][$attr['name']] = $attr['data'];
-                }
+            foreach ($records as $record_attr) {
+                if (!isset($ret[$record_attr['record_id']]))
+                    $ret[$record_attr['record_id']] = array('_id' => $record_attr['record_id']);
+                    
+                $ret[$record_attr['record_id']][$record_attr['name']] = $record_attr['data'];
             }
-            return $ret;
+            return $ret;    
         }
         function FindByID($type, $id) {
             $result = $this->Find($type,array("_id" => $id));
@@ -338,6 +348,7 @@
         function Save($type, $data) {
             $this->beginTransaction();
             
+            // get the model id
             $q = "SELECT * FROM models WHERE name LIKE :name;";
             $stmt = $this->prepare($q);
             $stmt->bindValue("name",$type);
@@ -409,10 +420,9 @@
             */
             foreach ($data as $structure => $value) {
                 $attr_id = 0;
-                $q = "UPDATE record_data SET data = :data WHERE structure_id = :structure_id AND record_id = :record_id";    
                 
                 if (!is_numeric($structure)) {
-                    // otherwise need to look up the structure id
+                    // otherwise need to look up the structure id by name
                     $sq = "SELECT * FROM model_structure WHERE `model_id`=:model_id AND `name` LIKE :name;";
                     $stmt = $this->prepare($sq);
                     $stmt->bindValue("model_id",$model_id);
@@ -430,11 +440,13 @@
                     }
                 }
                 
+                $q = "UPDATE record_data SET data = :data WHERE structure_id = :structure_id AND record_id = :record_id";    
                 $tuple = array(
                     "data" => $value,
                     "structure_id" => $structure,
                     "record_id" => $record_id
                 );
+                _debug($tuple);
                 $stmt = $this->prepare($q);
                 $stmt->execute($tuple);
             }
