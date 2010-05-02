@@ -50,7 +50,8 @@
         static function save(rPasswordAttrActionHandler $self, $record) {
             $password = $record[$self->GetName()];
             $password_confirm = $record[$self->GetName() . '_confirm'];
-            if ($password == $password_confirm) {
+            
+            if ($password == $password_confirm && !empty($password_confirm)) {
                 // hash the password
                 $options = $self->GetOptions();
                 
@@ -58,13 +59,10 @@
                 unset($record[$self->GetName() . "_confirm"]);
                 return $record;
             }
-            else if (empty($record[$self->GetName()])) {
-                throw new EmptyPasswordException();
-            }
-            else {
-                throw new PasswordsDontMatchException();
-            }
-            return false;
+           
+            unset($record[$self->GetName()]);
+            unset($record[$self->GetName() . "_confirm"]);
+            return $record;
         }
     }
 ?>

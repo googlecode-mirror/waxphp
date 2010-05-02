@@ -115,7 +115,6 @@
             }
             
             $stmt->bindValue("id",$struct);
-            _debug($attr_data);
             foreach ($attr_data as $col => $val) {
                 $stmt->bindValue($col,$val);
             }
@@ -348,6 +347,7 @@ QUERY;
         function Save($type, $data) {
             $this->beginTransaction();
             
+            _debug($data);
             // get the model id
             $q = "SELECT * FROM models WHERE name LIKE :name;";
             $stmt = $this->prepare($q);
@@ -418,6 +418,7 @@ QUERY;
                     another_attr => value       record_data[name=another_attr][record_id=record.id]
                 )
             */
+            $types = $this->Find($type,array("_id" => $record_id));
             foreach ($data as $structure => $value) {
                 $attr_id = 0;
                 
@@ -439,14 +440,16 @@ QUERY;
                         $structure = $struct['id'];
                     }
                 }
-                
-                $q = "UPDATE record_data SET data = :data WHERE structure_id = :structure_id AND record_id = :record_id";    
+
+                $q = "UPDATE record_data SET data = :data WHERE structure_id = :structure_id AND record_id = :record_id";
+                if (!isset($types[$structure]))
+                    $q = "INSERT INTO record_data (`data`,`structure_id`,`record_id`) VALUES (:data, :structure_id, :record_id);";
+
                 $tuple = array(
                     "data" => $value,
                     "structure_id" => $structure,
                     "record_id" => $record_id
                 );
-                _debug($tuple);
                 $stmt = $this->prepare($q);
                 $stmt->execute($tuple);
             }
