@@ -25,7 +25,7 @@
 				
 				// register block directories
 				WaxConf::BlocksAt($dir . "/blocks");
-				WaxConf::BlocksAt(__DIR__ . "/../../blocks");
+				WaxConf::BlocksAt(dirname(__FILE__) . "/../../blocks");
                 
                 // require Wax core
                 $dir = dirname(__FILE__) . "/..";
