@@ -471,5 +471,84 @@ QUERY;
             
             $this->commit();
         }
+        
+        function ACL_Get($recordid = NULL, $resourceid = NULL) {
+            $stmt = NULL;
+            if (is_null($recordid) && is_null($resourceid)) {
+                wax_error("Cannot have record id and resource id be null in an ACL lookup");
+                return;
+            }
+            else if (is_null($recordid)) {
+                $q = "SELECT * FROM `acl` WHERE `resource` LIKE :resource;";
+                $stmt = $this->prepare($q);
+                $stmt->bindValue("resource",$resourceid);
+            }
+            else if (is_null($resourceid)) {
+                $q = "SELECT * FROM `acl` WHERE `for`=:record_id;";
+                $stmt = $this->prepare($q);
+                $stmt->bindValue("record_id",$recordid);
+            }
+            else {
+                $q = "SELECT * FROM `acl` WHERE `for`=:record_id and `resource` LIKE :resource;";
+                $stmt = $this->prepare($q);
+                $stmt->bindValue("record_id",$recordid);
+                $stmt->bindValue("resource",$resourceid . "%");
+            }
+            $stmt->execute();
+            
+            $errchk = $stmt->errorInfo();
+            if ($errchk[0] != '00000') {
+                $this->rollBack();
+                throw new WaxPDOException($errchk);
+            }
+            
+            $result = $stmt->fetchAll();
+            $ret = array();
+            foreach ($result as $permission) {
+                if ($permission['permission'] == "DENY")
+                    $ret[$permission['resource']] = false;
+                else
+                    $ret[$permission['resource']] = true;
+            }
+            
+            return $ret;
+        }
+        
+        // give or remove access to $resourceid as object $recordid
+        function ACL_Set($recordid, $resourceid, $allow_deny = "ALLOW") {
+            $this->beginTransaction();
+            
+            // get the current permissions
+            $permissions = $this->ACL_get($recordid);
+            
+            if ($allow_deny === NULL) {
+                if (isset($permissions[$resourceid])) {
+                    $q = "DELETE FROM `acl` WHERE `for`=:record_id AND `resource`=:resource_id;";
+                    $stmt = $this->prepare($q);
+                    $stmt->bindValue("record_id",$recordid);
+                    $stmt->bindValue("resource_id",$resourceid);
+                    _debug("Removing $recordid's permissions for $resourceid");
+                }
+                else return;
+            }
+            else {
+                $q = "INSERT INTO `acl` (`for`,`resource`,`permission`) VALUES (:record_id, :resource_id, :permission);";
+                if (isset($permissions[$resourceid]))
+                    $q = "UPDATE `acl` SET `permission`=:permission WHERE `for`=:record_id AND `resource`=:resource_id;";
+            
+                $stmt = $this->prepare($q);
+                $stmt->bindValue("record_id", $recordid);
+                $stmt->bindValue("resource_id", $resourceid);
+                $stmt->bindValue("permission", ($allow_deny == "DENY" ? "" : "DENY"));
+            }
+            $stmt->execute();
+            $errchk = $stmt->errorInfo();
+            if ($errchk[0] != '00000') {
+                $this->rollBack();
+                throw new WaxPDOException($errchk);
+            }
+            
+            $this->commit();
+        }
     }
 ?>

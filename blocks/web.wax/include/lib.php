@@ -52,9 +52,11 @@
         
         $url = url_to($method, $obj, $args);
         header("Location: $url");
+        
         echo "<meta http-equiv='refresh' content='2'>";
         echo "<script type='text/javascript'>location.href='$url';</script>";
         die();
+        exit;
     }
     
     function render_view(WaxBlock $block, $viewname, $args = array()) {
