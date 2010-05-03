@@ -11,7 +11,7 @@
             parent::__construct($dsn, $username, $password);
         }
         
-        function CreateType($name, $attributes) {
+        function CreateType($name, $attributes = array(), $attr_default = NULL) {
             $types = array();
             foreach ($attributes as $colname => $type) {
                 $types[] = "`$colname` $type";
@@ -24,7 +24,7 @@
                 throw new WaxPDOException($errchk);
             }
         }
-        function ExamineType($name) {
+        function ExamineType($name, $detailed = false) {
             $q = "DESCRIBE `$name`;";
             $stmt = $this->prepare($q);
             $attribs = array();
@@ -36,7 +36,6 @@
             return $attribs;
         }
         function AlterType($name, $attr_add = NULL, $attr_remove = NULL, $attr_rename = NULL) {
-            
         }
         function DeleteType($name) {
             $q = "DROP TABLE `$name`;";
@@ -44,7 +43,7 @@
             $stmt->execute();
         }
         
-        function Find($type, $filters = NULL) {
+        function Find($type, $filters = array()) {
             $conds = array();
             $q = "SELECT * FROM `$type`";
             if (!is_null($filters)) {
@@ -76,9 +75,11 @@
             }
             return $ret;
         }
-        function FindWithID($type, $id) {
+        
+        function FindByID($type, $id) {
             return $this->Find($type, array("id" => $id));
         }
+        
         function Save($type, $data) {
             if (isset($data['id'])) {
                 $id = $data['id'];
@@ -104,7 +105,7 @@
             }
             else return $this->Create($type, $data);
         }
-        function Create($type, $data = array()) {
+        function Create($type, $data = NULL) {
             $cols = array();
             $vals = array();
             
@@ -139,5 +140,12 @@
                 throw new WaxPDOException($errchk);
             }
         }
+        
+        // unimplemented methods
+        function ListTypes() {}
+        function AlterAttribute($struct, $attr_data, $option_data = array()) {}
+        function ACL_Get($recordid = NULL, $resourceid = NULL) {}
+        function ACL_Set($recordid, $resourceid, $allow_deny = "ALLOW") {}
+        
     }
 ?>
