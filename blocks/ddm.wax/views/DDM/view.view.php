@@ -8,7 +8,7 @@
                     continue;
                 }
             
-                $attrctx = new AttrRenderCtx();
+                $attrctx = new AttrRenderCtx(); 
                 echo $attrctx->Execute($types[$col],"view",$value);
             ?></td>
         </tr>
@@ -16,5 +16,5 @@
 </table>
 <br />
 <br />
-<?=link_to("edit record","edit", NULL, array("id" => $row['_id']))?> | 
-<?=link_to("delete record","delete",NULL, array("id" => $row['_id']))?>
+<?=link_to("edit record","edit", (isset($type) ? $type : NULL), array("id" => $row['_id']))?> | 
+<?=link_to("delete record","delete",(isset($type) ? $type : NULL), array("id" => $row['_id']))?>

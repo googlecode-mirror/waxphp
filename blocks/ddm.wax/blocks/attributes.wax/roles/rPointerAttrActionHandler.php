@@ -33,7 +33,8 @@
         static function editor(rPointerAttrActionHandler $self) {
             $ddm = DSM::Get();
             $types = $ddm->ListTypes();
-            $this->view['types'] = $types;
+            $view = array();
+            $view['types'] = $types;
             
             $options = $self->GetOptions();
             
@@ -47,7 +48,8 @@
             else
                 $descs = array($options['type'] => $ddm->ExamineType($options['type']));
                 
-            return array('typeattrs' => $descs);
+            $view['typeattrs'] = $descs;
+            return $view;
         }
     }
 ?>

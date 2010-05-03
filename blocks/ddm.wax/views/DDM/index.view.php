@@ -23,8 +23,8 @@
                 ?></td>
             <?php endforeach; ?>
             <td style='white-space:nowrap;'>
-                <?=link_to("edit record","edit", NULL, array("id" => $row['_id']))?> | 
-                <?=link_to("delete record","delete",NULL, array("id" => $row['_id']))?>
+                <?=link_to("edit record","edit", (isset($type) ? $type : NULL), array("id" => $row['_id']))?> | 
+                <?=link_to("delete record","delete", (isset($type) ? $type : NULL), array("id" => $row['_id']))?>
             </td>
         </tr>
     <?php endforeach; ?>
@@ -34,6 +34,8 @@
     <b>This model has no records</b>
 <?php endif; ?>
 <br />
+<?php if (!isset($showlinks) || $showlinks): ?>
 <?=link_to("Create New Record","create");?> | 
 <?=link_to("Alter Data Model","modify");?> | 
 <?=link_to("Main Page","index","Home");?>
+<?php endif; ?>

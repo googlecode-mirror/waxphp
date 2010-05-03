@@ -157,8 +157,7 @@
             $iq = "INSERT INTO structure_options (`structure_id`,`name`,`value`) VALUES (:struct_id, :name, :value);";
             $istmt = $this->prepare($iq);
             foreach ($option_data as $name => $value) {
-                if (!isset($optionlist[$name])) {
-                    _debug("Struct: $struct | name: $name, value: $value");
+                if (!isset($optionlist[$name]) && !empty($name) && !empty($value)) {
                     $istmt->execute(array(
                         "struct_id" => $struct,
                         "name" => $name,
@@ -272,13 +271,15 @@
                 );
             ***/
             $q = <<<QUERY
-SELECT * FROM record_data
+SELECT *,model_structure.name as attr_name FROM record_data
 JOIN model_structure ON model_structure.id = record_data.structure_id
+JOIN models ON model_structure.model_id = models.id
+WHERE models.name LIKE :model_name
 QUERY;
                 
             // _id is a special case --> find this record
             if (isset($filters['_id'])) {
-                $q .= " WHERE record_data.record_id=:id";
+                $q .= " AND record_data.record_id=:id";
             }
             else {
                 $qconds = array();
@@ -292,13 +293,14 @@ QUERY;
                     $qargs[$column . "_value"] = $value;
                 }
                 if (count($qconds) > 0) {
-                    $q .= " WHERE ";
+                    $q .= " AND ";
                     $q .= implode(" AND ",$qconds);
                 }
             }
             $q .= ";";
             
             $stmt = $this->prepare($q);
+            $stmt->bindValue("model_name",$type);
             if (isset($filters['_id'])) {
                 $stmt->bindValue("id",$filters['_id']);
             }
@@ -326,13 +328,13 @@ QUERY;
                 throw new WaxPDOException($errchk);
             }
             $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             $ret = array();
             foreach ($records as $record_attr) {
                 if (!isset($ret[$record_attr['record_id']]))
                     $ret[$record_attr['record_id']] = array('_id' => $record_attr['record_id']);
                     
-                $ret[$record_attr['record_id']][$record_attr['name']] = $record_attr['data'];
+                $ret[$record_attr['record_id']][$record_attr['attr_name']] = $record_attr['data'];
             }
             return $ret;    
         }
@@ -347,7 +349,6 @@ QUERY;
         function Save($type, $data) {
             $this->beginTransaction();
             
-            _debug($data);
             // get the model id
             $q = "SELECT * FROM models WHERE name LIKE :name;";
             $stmt = $this->prepare($q);
