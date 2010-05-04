@@ -367,8 +367,12 @@ QUERY;
             
             // get the record id -- create a new record if necessary 
             $record_id = NULL;
+            $record = array();
+            $structure = $this->ExamineType($type,true);
+
             if (isset($data['_id'])) {
                 $record_id = $data['_id'];
+                $record = $this->Find($type, array("_id" => $data['_id']));
                 unset($data['_id']);
             }
             else {
@@ -382,73 +386,21 @@ QUERY;
                     throw new WaxPDOException($errchk);
                 }
                 $record_id = $this->lastInsertID();
-                
-                // insert a row for each attribute
-                $q = "SELECT * FROM model_structure WHERE model_id LIKE :mid;";
-                $stmt = $this->prepare($q);
-                $stmt->bindValue("mid",$model_id);
-                $stmt->execute();
-                $errchk = $stmt->errorInfo();
-                if ($errchk[0] != '00000') {
-                    $this->rollBack();
-                    throw new WaxPDOException($errchk);
-                }
-                $iq = "INSERT INTO record_data (`structure_id`,`record_id`) VALUES (:structure, :record);";
-                $istmt = $this->prepare($iq);
-                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                foreach ($rows as $attr) {
-                    $istmt->execute(array("structure" => $attr['id'],"record" => $record_id));
-                    $errchk = $istmt->errorInfo();
-                    if ($errchk[0] != '00000') {
-                        $this->rollBack();
-                        throw new WaxPDOException($errchk);
-                    }
-                    if (isset($data[$attr['name']])) {
-                        $v = $data[$attr['name']];
-                        unset($data[$attr['name']]);
-                        $data[$attr['id']] = $v;
-                    }
-                }
             }
             
-            /*
-                array(
-                    _id => value                record.id
-                    attr => value               record_data[name=attr][record_id=record.id]
-                    another_attr => value       record_data[name=another_attr][record_id=record.id]
-                )
-            */
-            $types = $this->Find($type,array("_id" => $record_id));
-            foreach ($data as $structure => $value) {
+            foreach ($data as $attr => $value) {
                 $attr_id = 0;
                 
-                if (!is_numeric($structure)) {
-                    // otherwise need to look up the structure id by name
-                    $sq = "SELECT * FROM model_structure WHERE `model_id`=:model_id AND `name` LIKE :name;";
-                    $stmt = $this->prepare($sq);
-                    $stmt->bindValue("model_id",$model_id);
-                    $stmt->bindValue("name",$structure);
-                    $stmt->execute();
-                    $errchk = $stmt->errorInfo();
-                    if ($errchk[0] != '00000') {
-                        $this->rollBack();
-                        throw new WaxPDOException($errchk);
-                    }
-                    $rowcount = $stmt->rowCount();
-                    if ($rowcount > 0) {
-                        $struct = $stmt->fetch();
-                        $structure = $struct['id'];
-                    }
-                }
+                if (!is_numeric($attr))
+                    $attr = $structure[$attr]['id'];
 
                 $q = "UPDATE record_data SET data = :data WHERE structure_id = :structure_id AND record_id = :record_id";
-                if (!isset($types[$structure]))
+                if (!isset($record[$attr]))
                     $q = "INSERT INTO record_data (`data`,`structure_id`,`record_id`) VALUES (:data, :structure_id, :record_id);";
 
                 $tuple = array(
                     "data" => $value,
-                    "structure_id" => $structure,
+                    "structure_id" => $attr,
                     "record_id" => $record_id
                 );
                 $stmt = $this->prepare($q);
@@ -459,10 +411,22 @@ QUERY;
         function Delete($type, $id) {
             $this->beginTransaction();
             
+            $q = "DELETE FROM record_data WHERE record_id = :id;";
+            $stmt = $this->prepare($q);
+            $stmt->bindValue('id', $id);
+            $stmt->execute();
+            
+            $errchk = $stmt->errorInfo();
+            if ($errchk[0] != '00000') {
+                $this->rollBack();
+                throw new WaxPDOException($errchk);
+            }
+            
             $q = "DELETE FROM records WHERE id = :id;";
             $stmt = $this->prepare($q);
             $stmt->bindValue(":id",$id);
             $stmt->execute();
+            
             $errchk = $stmt->errorInfo();
             if ($errchk[0] != '00000') {
                 $this->rollBack();

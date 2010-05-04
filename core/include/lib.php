@@ -94,10 +94,10 @@
 	* Prints out Wax text
 	*/
 	function _wax() {
-	    echo "<span style='font-weight:bold;'>" . 
+	    echo "<span style='font-weight:bold;'><a href='http://code.google.com/p/waxphp'>" . 
 	         "<span style='color:#162d50;'>W</span>" . 
 	         "<span style='color:#2c5aa0;'>A</span>" . 
 	         "<span style='color:#87aade;'>X</span>" . 
-	         "</span>";
+	         "</a></span>";
 	}
 ?>

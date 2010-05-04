@@ -56,6 +56,10 @@
         static function save(rScaffolder $self) {
             $ddm = DSM::Get();
             
+            // Give each attribute a chance to examine the data
+            // and verify or change it.  For example, a Password
+            // field might check to see if the two password fields
+            // match, then remove the extra field from the record.
             $attrs = $ddm->ExamineType($self->GetType(),true);
             foreach ($attrs as $attr => $details) {
                 if (isset($_POST['record'][$attr])) {   
@@ -67,7 +71,7 @@
                 }
             }
             
-            $ddm->Save($self->GetType(), $_POST['record']);
+            $res = $ddm->Save($self->GetType(), $_POST['record']);
             redirect("index");
         }
         static function create(rScaffolder $self) {

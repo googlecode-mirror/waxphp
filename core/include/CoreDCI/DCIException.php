@@ -135,6 +135,15 @@
 		}
 		
 		/**
+		* Returns the title for the exception
+		*/
+		function getTitle() { return $this->title; }
+		/**
+		* Returns the details of the exception
+		*/
+		function getDetails() { return $this->details; }
+		
+		/**
 		* Returns a detailed stack trace that more accurately portrays the
 		* call structure.
 		*/
