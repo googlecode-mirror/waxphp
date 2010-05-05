@@ -8,7 +8,7 @@
         }
     }
     
-    class IWHDS extends WaxPDO implements iWaxDataSource {
+    class DDS extends WaxPDO implements iWaxDataSource {
         private function getModelID($name) {
             $q = "SELECT * FROM models WHERE name LIKE :name;";
             $stmt = $this->prepare($q);

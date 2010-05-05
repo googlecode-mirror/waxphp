@@ -1,8 +1,8 @@
-<?=
-    (!empty($value) ? 
+<?
+    echo (!empty($value) ? 
         date(
         (
-            isset($options['custom_format']) ? 
+            $options['format'] == 'custom' ? 
             $options['custom_format'] : 
             $options['format']
         )

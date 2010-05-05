@@ -45,7 +45,6 @@
         static function modify_rename(rDynamicModelHandler $self) {
             $ddm = DSM::Get();
             if ($_POST) {
-                _debug($_POST);
                 $alter = array();
                 $options = array();
                 foreach ($_POST['model'] as $attr => $details) {
