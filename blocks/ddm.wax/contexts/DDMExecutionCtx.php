@@ -14,6 +14,9 @@
                 $router->data['objectname'] = "DDM";
                 $view_args = $router->ExecuteTarget(array($objtype));
             }
+            if (is_null($view_args)) 
+                $view_args = array();
+                
             return $view_args;
         }
     }

@@ -1,7 +1,7 @@
 <?php
     class WaxPDOException extends WaxException {
         function __construct($errinfo) {
-            parent::__construct("Database Error ($errinfo[1])",$errinfo[2]);
+            parent::__construct("Database Error ($errinfo[1])",$errinfo[2] . "<hr /><pre>" . print_r($errinfo,true) . "</pre>");
         }
     }
     // iWaxDataSource defines the input/output methods that

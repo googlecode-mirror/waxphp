@@ -1,6 +1,11 @@
 <?php
     interface rScaffolder {}
     
+    class MissingIDException extends WaxException {
+        function __construct($type) {
+            parent::__construct("No ID Specified","You must specify an ID to view $type");
+        }
+    }
     /**
     * self role is responsible for basic scaffolding.  Since the 
     * scaffolder uses the DynamicModel backend, the views don't 
@@ -45,29 +50,49 @@
         static function view(rScaffolder $self) {
             $ddm = DSM::Get();
             
+            if (!$self->id) {
+                throw new MissingIDException($self->GetType());;
+            }
+            
             $results = $ddm->FindByID($self->GetType(), $self->id);
             $record = $ddm->ExamineType($self->GetType(),true);
             
+            // look for children
+            $children = array();
+            foreach ($ddm->ListTypes() as $id => $type) {
+                $structure = $ddm->ExamineType($type,true);
+
+                foreach ($structure as $column => $details) {
+                    if ($details['type'] == "pointer" && $details['options']['type'] == $self->GetType()) {
+                        $children[$type] = $ddm->Find($type, array($column => $self->id));
+                    }
+                }
+            }
+            
             return array(
                 'row' => $results,
+                'children' => $children,
                 'types' => $record
             );
         }
         static function save(rScaffolder $self) {
             $ddm = DSM::Get();
-            
+                        
             // Give each attribute a chance to examine the data
             // and verify or change it.  For example, a Password
             // field might check to see if the two password fields
             // match, then remove the extra field from the record.
             $attrs = $ddm->ExamineType($self->GetType(),true);
             foreach ($attrs as $attr => $details) {
-                if (isset($_POST['record'][$attr])) {   
+                try {
                     $attrctx = new AttrSaveCtx();
                     $result = $attrctx->Execute($details, $_POST['record']);
                     if ($result) {
                         $_POST['record'] = $result;
                     }
+                }
+                catch (RoleMethodNotFoundException $rmnfe) {
+                    continue;
                 }
             }
             

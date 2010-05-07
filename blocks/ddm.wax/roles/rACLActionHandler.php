@@ -3,11 +3,18 @@
     
     class rACLActionHandlerActions {
         static function index(rACLActionHandler $self) {
+            $ddm = DSM::Get();
+            $view = array();
+            
+            // get model types
+            $view['models'] = $ddm->ListTypes();
+            
+            return $view;
         }
         static function owner(rACLActionHandler $self, $record_id) {
             $ddm = DSM::Get();
             $permissions = $ddm->ACL_Get($record_id);
-            
+
             return array("permissions" => $permissions, "record_id" => $record_id);
         }
         static function resource(rACLActionHandler $self, $resource_id) {

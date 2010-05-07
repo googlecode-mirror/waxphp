@@ -14,9 +14,9 @@
 	        $obj = "Home";
 	        	        
 	    $url = array($obj);
-	    if (isset($args['id'])) {
-	        $url[] = $args['id'];
-	        unset($args['id']);
+	    if (isset($args['_id'])) {
+	        $url[] = $args['_id'];
+	        unset($args['_id']);
 	    }
 	    
 	    $url[] = $method;
@@ -29,7 +29,7 @@
 	    return $base;
 	}
 	
-	function link_to($text, $method = NULL, $object = NULL, $args = array(), $attribs = array()) {
+	function link_to($text, $method = NULL, $object = NULL, array $args = array(), array $attribs = array()) {
 	    return "<a href='" . url_to($method, $object, $args) . "'>$text</a>";
 	}
 	

@@ -19,7 +19,7 @@
 	* @param string $dir The directory to include
 	* @param int $max_depth The maximum depth to include directories
 	*/
-	function require_dir($dir, $max_depth = 10) {
+	function _require_dir($dir, $max_depth = 10) {
 	    if ($max_depth == 0) return;
 	    
     	if (is_dir($dir)) {
@@ -34,6 +34,10 @@
                 }
             }
         }
+    }
+    // provided for compatibility purposes:
+    function require_dir($dir, $max_depth = 10) {
+        _require_dir($dir, $max_depth);
     }
     
     /**

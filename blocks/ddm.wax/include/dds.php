@@ -284,13 +284,15 @@ QUERY;
             else {
                 $qconds = array();
                 foreach ($filters as $column => $value) {
+                    $col4query = str_replace(" ","_",$column);
+                    
                     $qconds[] = "record_data.record_id IN (\n" . 
                                 "SELECT record_data.record_id FROM record_data \n" . 
                                 "JOIN model_structure ON model_structure.id = record_data.structure_id \n" . 
-                                "WHERE (`model_structure`.`name`=:${column}_name AND `data` LIKE :${column}_value)\n" . 
+                                "WHERE (`model_structure`.`name`=:${col4query}_name AND `data` LIKE :${col4query}_value)\n" . 
                                 ")";
-                    $qargs[$column . "_name"] = $column;
-                    $qargs[$column . "_value"] = $value;
+                    $qargs[$col4query . "_name"] = $column;
+                    $qargs[$col4query . "_value"] = $value;
                 }
                 if (count($qconds) > 0) {
                     $q .= " AND ";
@@ -306,10 +308,12 @@ QUERY;
             }
             else {
                 foreach ($filters as $column => $value) {
+                    $col4query = str_replace(" ","_",$column);
+                    
                     $q = str_replace(
                         array(
-                            ":${column}_name",
-                            ":${column}_value"
+                            ":${col4query}_name",
+                            ":${col4query}_value"
                         ),
                         array(
                             "'" . $column . "'",
@@ -317,8 +321,8 @@ QUERY;
                         ),
                         $q
                     );
-                    $stmt->bindValue($column . "_name",$column);
-                    $stmt->bindValue($column . "_value",$value);
+                    $stmt->bindValue($col4query . "_name",$column);
+                    $stmt->bindValue($col4query . "_value",$value);
                 }
             }
 

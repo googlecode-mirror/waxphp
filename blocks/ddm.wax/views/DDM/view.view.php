@@ -14,6 +14,12 @@
         </tr>
     <?php endforeach; ?>
 </table>
+<hr />
+<h3>Comments:</h3>
+<?php foreach ($children['Comments'] as $comment): ?>
+    <b>By <?=$comment['Author']?></b><br />
+    <?=$comment['Comment']?><br /><br />
+<?php endforeach; ?>
 <br />
 <br />
 <?=link_to("edit record","edit", (isset($type) ? $type : NULL), array("id" => $row['_id']))?> | 

@@ -14,6 +14,7 @@
             * found in the current block.
             */
             $content_for_layout = '';
+            
             try {
                 // Try finding the view in the application block
                 $content_for_layout = $vr_ctx->Execute(new View($appblock, $view_name), $view_args);
