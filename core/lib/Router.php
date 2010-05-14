@@ -84,10 +84,13 @@
                     );
         var $data = array('args' => array());
         
-        function __construct($querystring) {
+        function __construct($querystring, $default_object = "Home", $default_method = "index") {
             parent::__construct();
             
             $parts = explode("/",$querystring);
+            
+            $this->aliases['objectname'] = $default_object;
+            $this->aliases['method'] = $default_method;
             
             // take apart the querystring
             $indx = 0;

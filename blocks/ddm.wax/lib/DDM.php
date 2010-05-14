@@ -1,5 +1,5 @@
 <?php
-    class DDM extends WaxObject implements rScaffolder, rDynamicModelHandler {
+    class DDM extends WaxObject implements rScaffolder, rDynamicModelHandler, rDDMParent {
         var $type = NULL;
         
         function initialize($type = NULL) {

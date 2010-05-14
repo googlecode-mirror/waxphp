@@ -56,8 +56,48 @@
         	else {
         	    $blockobj = new WaxBlock($path);
         	    self::$_loaded_blocks[$blockobj->name] = $blockobj;
+        	    
+        	    // cache this block's resources
+        	    // this part here in essence aggregates all loaded block resources 
+        	    // into a single cache, making lookups for views, js, and css easier.
+        	    foreach ($blockobj->GetResourceList() as $resource_type => $resources) {
+        	        if (!isset(self::$_blockresources[$resource_type]))
+        	            self::$_blockresources[$resource_type] = array();
+        	            
+        	        foreach ($resources as $name => $resource) {
+        	            if (!isset(self::$_blockresources[$resource_type][$name]))
+        	                self::$_blockresources[$resource_type][$name] = array();
+        	                
+        	            array_unshift(self::$_blockresources[$resource_type][$name], $resource);
+        	        }
+        	    }
+        	    
         	    return $blockobj;
         	}
+        }
+        
+        /**
+        * Finds a resource path based on its name.  This method will
+        * look through the resource cache and return the most recently
+        * loaded path for the given name.
+        *
+        * @param string $type The type of resource to lookup (views / images / css / js / etc...)
+        * @param string $name The name of the resource to lookup
+        */
+        static function Lookup($type, $name = NULL) {
+            if (isset(self::$_blockresources[$type])) {
+                if (isset(self::$_blockresources[$type][$name])) {
+                    return self::$_blockresources[$type][$name][0];
+                }
+                else if (is_null($name)) {
+                    $ret = array();
+                    foreach (self::$_blockresources[$type] as $name => $locations) {
+                        $ret[$name] = $locations[0];
+                    }
+                    return $ret;
+                }
+            }
+            throw new ResourceNotFoundException("$type/$name");
         }
         
         /**
@@ -134,19 +174,10 @@
         * @return array;
         */
 		static function GetDHTMLResources($ret_only = NULL) {
-			$ret = array('js' => array(), 'css' => array());
-			foreach (self::GetLoadedBlocks() as $name => $block) {
-				foreach ($block->js as $script) {
-					$ret['js'][] = $script;
-				}
-				foreach ($block->css as $css) {
-					$ret['css'][] = $css;
-				}
-			}
-			if ($ret_only == 'js' || $ret_only == 'css')
-				return $ret[$ret_only];
-			else
-				return $ret;
+			return array(
+			    'js' => self::Lookup("js"),
+			    'css' => self::Lookup("css")
+			);
 		}
         
         /**

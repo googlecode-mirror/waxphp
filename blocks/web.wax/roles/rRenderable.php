@@ -16,29 +16,27 @@
             $block = $self->GetViewBlock();
             $viewname = $self->GetViewName();
             try {
-                $viewfile = $block->views[$viewname];
+                if (!is_null($block))
+                    $viewfile = $block->views[$viewname];
+                else if (!file_exists($viewname))
+                    $viewfile = BlockManager::Lookup("views",$viewname);
+                else
+                    $viewfile = $viewname;
             }
             catch (ResourceNotFoundException $rnfe) {
-                throw new ViewNotFoundException($self->GetViewName(),$block->views);
+                throw new ViewNotFoundException($self->GetViewName(),$block);
             }
-             
+            
             if (file_exists($viewfile)) {	
     			if (is_array($arguments)) {
-    				foreach ($arguments as $arg => $val) {
-    					if (!is_numeric($arg))
-    						$$arg = $val;
-    					else {
-    						$arg = "_$arg";
-    						$$arg = $val;
-    					}
-    				}
+    				extract($arguments);
     			}
 			    
     			ob_start();
-    			    require($viewfile);
+    			    include($viewfile);
         			$rendered_view = ob_get_contents();
     			ob_end_clean();
-    			
+    		    
     			return $rendered_view;
     		}
     		else throw new ViewNotFoundException($viewname, $block->views);

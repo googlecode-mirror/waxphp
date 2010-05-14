@@ -1,32 +1,4 @@
 <?php
-	function wax_error_handler($code, $message, $file, $line) {
-        @ob_end_flush();
-	    switch ($code) {
-	        case E_NOTICE:
-	        break;
-	        case E_USER_NOTICE:
-	            echo "<span class='wax_notice'>Wax Error: $message @ $file:$line</span><br />";
-	        break;
-	        default:
-        	    throw new WaxException("Uncaught Error ($code)",$message, $code, $file, $line);
-	    }
-	}
-	
-	function wax_exception_handler($exception) {
-	    @ob_end_flush();
-		try {
-		    if (!($exception instanceof WaxException)) {
-		        // translate the exception into a wax exception
-		        $exception = new WaxException($exception->getMessage(), "", $exception->getFile(), $exception->getLine());
-		    }
-			echo($exception->__toString());
-		}
-		catch (Exception $e) {
-			echo (get_class($e) . " thrown within the exception handler. <br />" .
-			    $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine() . "<br />");
-		}
-	}
-	
 	class WaxException extends DCIException {}
 	
 	class KeyNotFoundException extends WaxException {
@@ -97,20 +69,23 @@
         }
     }
     
-    class InvalidResourceException extends WaxException {
-        function __construct($obj, $method, $args) {
-            parent::__construct("Invalid Resource Action Specified","Resource " . get_class($obj) . "." . $obj->id . " does not contain '$method'");
-        }
-    }
-    class UnlinkableResourceException extends WaxException {
-        function __construct($obj, $method, $args) {
-            parent::__construct("Unlinkable Resource (Type = " . (is_object($obj) ? get_class($obj) : $obj) . ")", "Only WaxObject resources can be linked by URL.");
-        }
-    }
-    
     class AttributeNotFoundException extends WaxException {
         function __construct($attr, $obj) {
             parent::__construct("Attribute Not Found: $attr","$attr not found in " . get_class($obj) . "<pre>" . print_r($obj,true) . "</pre>");
         }
     }
+    
+    class ResourceNotFoundException extends WaxException {
+		function __construct($resource, $block = NULL) {
+		    if (is_null($block))
+    			parent::__construct("$resource not found","The resource: $resource could not be found in any blocks.");
+    		else
+    		    parent::__construct("$resource not found", "<pre>" . print_r($block->_resources['views'],true) . "</pre>");
+		}
+	}
+	class BlockNotFoundException extends WaxException {
+	    function __construct($path) {
+	        parent::__construct("WaxBlock not found: $path","");
+	    }
+	}
 ?>

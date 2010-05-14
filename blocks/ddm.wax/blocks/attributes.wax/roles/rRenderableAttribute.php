@@ -26,7 +26,7 @@
             }
             
             $block = BlockManager::GetBlockFromContext(__FILE__);
-            $view = new View($block, "$type/$action");
+            $view = new View("$type/$action", $block);
             $vrctx = new ViewRenderCtx();
             
             // render the attributes views

@@ -13,15 +13,18 @@
         }
         static function save(rAntiSpamAttrActionHandler $self, $record) {
             $chks = array($self->GetName(), $self->GetName() . "2", $self->GetName() . "_confirm");
+            
+            _debug($_POST);
             foreach ($chks as $chk) {
+                _debug($chk);
                 if (!isset($record[$chk]) || empty($record[$chk]) || !is_numeric($record[$chk]))
                     throw new YoureARobotException();
             }
             
             if ($record[$self->GetName()] + $record[$self->GetName() . "2"] == $record[$self->GetName() . "_confirm"]) {
-                unset($record[$self->GetName()]);
-                unset($record[$self->GetName() . "2"]);
-                unset($record[$self->GetName() . "_confirm"]);
+                foreach ($chks as $chk) {
+                    unset($record[$chk]);
+                }
             }
             else throw new YoureARobotException();
         }

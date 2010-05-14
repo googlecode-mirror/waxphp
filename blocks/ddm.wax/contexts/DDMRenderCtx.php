@@ -17,22 +17,23 @@
             
             try {
                 // Try finding the view in the application block
-                $content_for_layout = $vr_ctx->Execute(new View($appblock, $view_name), $view_args);
+                $v = BlockManager::Lookup("views",$view_name);
+                $content_for_layout = $vr_ctx->Execute(new View($v), $view_args);
             }
-            catch (ViewNotFoundException $vnfe) {
+            catch (ResourceNotFoundException $vnfe) {
                 try {
                     // Try finding the view in the DDM block
                     // IE: Admin/viewname
                     //     ACL/viewname
                     $view_name = $router->DetermineViewname();
-                    $content_for_layout = $vr_ctx->Execute(new View($ddmblock, $view_name), $view_args);
+                    $content_for_layout = $vr_ctx->Execute(new View($view_name, $ddmblock), $view_args);
                 }
                 catch (ViewNotFoundException $vnfe) {
                     // Try finding the view in the DDM block under the DDM object
                     // Dynamic Models eventually end up here if there's no overrides
                     $router->data['objectname'] = 'DDM';
                     $view_name = $router->DetermineViewname();
-                    $content_for_layout = $vr_ctx->Execute(new View($ddmblock, $view_name), $view_args);
+                    $content_for_layout = $vr_ctx->Execute(new View($view_name, $ddmblock), $view_args);
                 }
             }
             

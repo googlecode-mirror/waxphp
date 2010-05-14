@@ -22,6 +22,9 @@
         
         function __construct($data = array()) {
             parent::__construct();
+            if (isset($data['_id']))
+                $this->id = $data['_id'];
+                
             $this->attrs = $data;
         }
         function __get($var) {

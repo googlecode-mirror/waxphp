@@ -119,6 +119,9 @@
 				throw new ResourceNotFoundException("$type/$name",$this);
 			}
 		}
+		function GetResourceList() {
+		    return $this->_resources;
+		}
 		
 		function GetBaseDir() { return $this->_blockdir; }
 		
@@ -132,16 +135,5 @@
 		    }
 		    else throw new ResourceNotFoundException($resourcetype,$this);
 		}
-	}
-	
-	class ResourceNotFoundException extends WaxException {
-		function __construct($resource, $block) {
-			parent::__construct("$resource not found", "<pre>" . print_r($block->_resources['views'],true) . "</pre>");
-		}
-	}
-	class BlockNotFoundException extends WaxException {
-	    function __construct($path) {
-	        parent::__construct("WaxBlock not found: $path","");
-	    }
 	}
 ?>

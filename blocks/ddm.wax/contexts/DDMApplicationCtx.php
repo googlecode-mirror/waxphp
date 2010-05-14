@@ -18,7 +18,7 @@
             $content_for_layout = $vrctx->Execute($router, $app, $ddm, $view_args);
 
             $lr_ctx = new LayoutRenderCtx();
-            return $lr_ctx->Execute(new View($app, "layout"), $content_for_layout);
+            return $lr_ctx->Execute(new View("layout"), $content_for_layout);
         }
     }
 ?>

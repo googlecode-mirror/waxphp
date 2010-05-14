@@ -23,8 +23,8 @@
                 ?></td>
             <?php endforeach; ?>
             <td style='white-space:nowrap;'>
-                <?=link_to("edit record","edit", (isset($type) ? $type : NULL), array("id" => $row['_id']))?> | 
-                <?=link_to("delete record","delete", (isset($type) ? $type : NULL), array("id" => $row['_id']))?>
+                <?=link_to("edit record","edit", (isset($type) ? $type : NULL), array("_id" => $row['_id']))?> | 
+                <?=link_to("delete record","delete", (isset($type) ? $type : NULL), array("_id" => $row['_id']))?>
             </td>
         </tr>
     <?php endforeach; ?>

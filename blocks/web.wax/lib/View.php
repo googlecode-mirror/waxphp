@@ -8,19 +8,19 @@
     * @version 0.10
     */
     class View extends DCIObject implements rRenderable {
-        function __construct($block, $viewname) {
+        protected $block;
+        protected $name;
+        
+        function __construct($name, WaxBlock $parent_block = NULL) {
             parent::__construct();
             
-            $this->block = $block;
-            $this->viewname = $viewname;
+            $this->block = $parent_block;
+            $this->name = $name;
         }
         function GetViewName() {
-            return $this->viewname;
+            return $this->name;
         }
         function GetViewBlock() {
-            if (is_string($this->block))
-                return BlockManager::GetBlock($this->block);
-
             return $this->block;
         }
         function __toString() {

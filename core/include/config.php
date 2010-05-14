@@ -26,26 +26,6 @@
         public static $blockpath = array(
         );
         
-        /** 
-        * the central database configuration list. 
-        **/
-        public static $database = array(
-            'mysql' => array(
-                'default' => array(
-                    'dsn' => 'mysql:host=127.0.0.1; dbname=wax',
-                    'username' => 'root',
-                    'password' => '',
-                )
-            ),
-            'sqlite' => array(
-                'default' => array(
-                    'dsn' => 'sqlite:wax_sqlite.sqlite',
-                    'username' => '',
-                    'password' => ''
-                )
-            )
-        );
-        
         /**
 		* blocks to autoload
 		*/
